@@ -8,6 +8,7 @@ import { createRouter } from './router.js';
 import { themeFor, nextBoundary } from './lib/theme.js';
 import { fmtTime } from './lib/time.js';
 import { icon } from './ui/icons.js';
+import { createHomeView } from './views/home.js';
 
 export const SECTIONS = ['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude'];
 const TITLES = {
@@ -54,7 +55,10 @@ export function boot({
 } = {}) {
   const html = doc.documentElement;
   const theStore = store || createStore({ load: () => api.getState() });
-  const viewMap = views || Object.fromEntries(SECTIONS.map((n) => [n, placeholderView(n)]));
+  const viewMap = views || {
+    ...Object.fromEntries(SECTIONS.map((n) => [n, placeholderView(n)])),
+    home: createHomeView(),
+  };
   const overlay = doc.getElementById('overlay');
   const toasts = doc.getElementById('toasts');
   const stalePill = doc.getElementById('stale');
