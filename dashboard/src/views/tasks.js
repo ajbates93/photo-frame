@@ -113,14 +113,21 @@ export function createTasksView() {
     const cols = columns();
     const known = new Set(cols.map((c) => c.id));
     const tasks = state.tasks || [];
-    setHtml($('.tasks-cols'), cols.map((c) => {
+    // Column shells persist (keyed by column ids) so each list keeps its scroll position.
+    const host = $('.tasks-cols');
+    const key = cols.map((c) => c.id).join('|');
+    if (host.dataset.key !== key) {
+      host.dataset.key = key;
+      host.innerHTML = cols.map((c) => `<div class="tcol" data-col="${esc(c.id)}"><div class="tcol-head"></div><div class="tcol-list"></div></div>`).join('');
+    }
+    const shells = host.children;
+    cols.forEach((c, i) => {
       const mine = sortTasks(tasks.filter((t) => (known.has(t.assignee) ? t.assignee : 'any') === c.id));
       const open = mine.filter((t) => !t.done).length;
-      return `<div class="tcol" data-col="${esc(c.id)}">`
-        + `<div class="tcol-head"><i class="dot" style="background:${c.color || 'var(--fam)'}"></i>`
-        + `<span class="tcol-name">${esc(c.name)}</span><span class="tcol-count">${open}</span></div>`
-        + `<div class="tcol-list">${mine.map((t) => taskHtml(t, now)).join('') || '<div class="tcol-empty">Nothing to do</div>'}</div></div>`;
-    }).join(''));
+      setHtml(shells[i].firstElementChild, `<i class="dot" style="background:${c.color || 'var(--fam)'}"></i>`
+        + `<span class="tcol-name">${esc(c.name)}</span><span class="tcol-count">${open}</span>`);
+      setHtml(shells[i].lastElementChild, mine.map((t) => taskHtml(t, now)).join('') || '<div class="tcol-empty">Nothing to do</div>');
+    });
     if (draft) syncAdd();
   }
 

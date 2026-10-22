@@ -171,10 +171,10 @@ describe('shell', () => {
     await flush();
     const next = { ...s.state, tasks: [] };
     s.api.act.mockResolvedValueOnce(next);
-    await shell.ctx.act('PATCH', '/api/tasks/x', { done: true });
+    await expect(shell.ctx.act('PATCH', '/api/tasks/x', { done: true })).resolves.toBe(true);
     expect(s.store.get().state).toBe(next);
     s.api.act.mockRejectedValueOnce(new Error('Nope'));
-    await expect(shell.ctx.act('POST', '/api/tasks', {})).resolves.toBeUndefined();
+    await expect(shell.ctx.act('POST', '/api/tasks', {})).resolves.toBe(false);
     expect(document.getElementById('toasts').textContent).toBe('Nope');
     await vi.advanceTimersByTimeAsync(3100);
     expect(document.getElementById('toasts').textContent).toBe('');

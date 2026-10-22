@@ -75,6 +75,19 @@ describe('tasks view', () => {
     expect(el.querySelector('[data-tid="t3"]').classList.contains('is-overdue')).toBe(false);
   });
 
+  it('keeps a column scroll position across a data update', () => {
+    const { el, view, ctx, state } = setup((s) => {
+      s.tasks = Array.from({ length: 15 }, (_, i) => ({ id: `n${i}`, title: `Job ${i}`, assignee: 'alex', due: null, done: false }));
+    });
+    const list = col(el, 'alex').querySelector('.tcol-list');
+    list.scrollTop = 120;
+    state.tasks[3].done = true;
+    view.update({ ...state, tasks: state.tasks.map((t) => ({ ...t })) }, ctx);
+    expect(col(el, 'alex').querySelector('.tcol-list')).toBe(list);
+    expect(list.querySelector('[data-tid="n3"]').classList.contains('is-done')).toBe(true);
+    expect(list.scrollTop).toBe(120);
+  });
+
   it('escapes titles', () => {
     const { el } = setup((s) => { s.tasks[0].title = '<b>x</b>'; });
     expect(el.querySelector('.tcol b')).toBeNull();

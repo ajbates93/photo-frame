@@ -98,8 +98,10 @@ export function boot({
     try {
       const next = await api.act(method, path, body);
       theStore.set(next);
+      return true;
     } catch (e) {
       toast((e && e.message) || 'Something went wrong');
+      return false;
     }
   }
 

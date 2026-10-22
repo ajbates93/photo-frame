@@ -61,11 +61,40 @@ describe('shopping view', () => {
     el.querySelector('[data-add]').click();
     expect(ctx.act).not.toHaveBeenCalled();
     input.value = '  Oat milk ';
+    ctx.act.mockResolvedValue(true);
     el.querySelector('[data-add]').click();
     expect(ctx.act).toHaveBeenCalledWith('POST', '/api/shopping/items', { text: 'Oat milk' });
     await Promise.resolve();
     await Promise.resolve();
     expect(input.value).toBe('');
+  });
+
+  it('keeps the typed text when the add fails', async () => {
+    const { el, ctx } = setup();
+    ctx.act.mockResolvedValue(false);
+    const input = el.querySelector('.shop-input');
+    input.value = 'Oat milk';
+    el.querySelector('[data-add]').click();
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    expect(input.value).toBe('Oat milk');
+    expect(el.querySelector('[data-add]').disabled).toBe(false);
+  });
+
+  it('ignores a second tap while an add is pending', async () => {
+    const { el, ctx } = setup();
+    let done;
+    ctx.act.mockImplementation(() => new Promise((r) => { done = r; }));
+    const input = el.querySelector('.shop-input');
+    input.value = 'Oat milk';
+    el.querySelector('[data-add]').click();
+    expect(el.querySelector('[data-add]').disabled).toBe(true);
+    el.querySelector('[data-add]').click();
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(ctx.act).toHaveBeenCalledTimes(1);
+    done(true);
+    await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    expect(input.value).toBe('');
+    expect(el.querySelector('[data-add]').disabled).toBe(false);
   });
 
   it('quick-add chips come from checked items and post on tap', () => {

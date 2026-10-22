@@ -43,6 +43,7 @@ export function createShoppingView() {
   let q = null;
   let ctx = null;
   let state = null;
+  let pending = false;
 
   const $ = (sel) => q.querySelector(sel);
 
@@ -73,25 +74,31 @@ export function createShoppingView() {
     setHtml($('.shop-list'), html);
   }
 
-  async function addText(text) {
+  // Resolves true when the item was added. One request at a time: a second tap is ignored.
+  async function post(text) {
     const t = String(text).trim();
-    if (!t) return;
-    await ctx.act('POST', '/api/shopping/items', { text: t });
+    if (!t || pending) return false;
+    pending = true;
+    $('[data-add]').disabled = true;
+    try {
+      return (await ctx.act('POST', '/api/shopping/items', { text: t })) === true;
+    } finally {
+      pending = false;
+      $('[data-add]').disabled = false;
+    }
   }
 
   async function submit() {
     const input = $('.shop-input');
-    const t = input.value.trim();
-    if (!t) return;
-    await addText(t);
-    input.value = '';
+    const ok = await post(input.value);
+    if (ok) input.value = '';
   }
 
   function onClick(e) {
     const t = e.target;
     if (t.closest('[data-add]')) { submit(); return; }
     const chip = t.closest('[data-chip]');
-    if (chip) { addText(chip.dataset.chip); return; }
+    if (chip) { post(chip.dataset.chip); return; }
     const row = t.closest('[data-iid]');
     if (row) {
       ctx.act('PATCH', `/api/shopping/items/${encodeURIComponent(row.dataset.iid)}`,
