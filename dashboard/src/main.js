@@ -129,7 +129,8 @@ export function boot({
   function resetIdle() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-      if (router.current() !== 'home') router.go('home');
+      const cur = router.current();
+      if (cur !== 'home' && cur !== 'photos') router.go('home');
     }, IDLE_MS);
   }
 
@@ -206,10 +207,10 @@ export function boot({
     }
   }
 
-  // Off overlay: it covers the screen, so the next tap lands on it, wakes the frame
+  // Off/dim overlay: it covers the screen, so the next tap lands on it, wakes the frame
   // and never reaches the control underneath. Touch/mouse/pointer events are not cancelled.
   function wake(e) {
-    if (!overlay.classList.contains('is-off')) return;
+    if (!overlay.classList.contains('is-off') && !overlay.classList.contains('is-dim')) return;
     if (e.type === 'click') e.stopPropagation();
     if (waking) return;
     waking = true;

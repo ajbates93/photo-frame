@@ -92,17 +92,36 @@ describe('shell', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it('dim overlay does not swallow taps', async () => {
+  it('dim overlay catches the first tap: wakes once and nothing underneath receives it', async () => {
     let s;
     ({ shell, ...s } = setup({ mode: 'dim' }));
     await flush();
-    expect(document.getElementById('overlay').classList.contains('is-dim')).toBe(true);
+    const overlay = document.getElementById('overlay');
+    expect(overlay.classList.contains('is-dim')).toBe(true);
     const underneath = vi.fn();
-    const el = document.querySelector('[data-view="home"]');
-    el.addEventListener('click', underneath);
-    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(underneath).toHaveBeenCalled();
-    expect(s.api.act).not.toHaveBeenCalled();
+    document.querySelector('[data-view="home"]').addEventListener('click', underneath);
+    const evs = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click'].map((t) => {
+      const e = new Event(t, { bubbles: true, cancelable: true });
+      overlay.dispatchEvent(e);
+      return e;
+    });
+    await flush();
+    expect(evs.every((e) => !e.defaultPrevented)).toBe(true);
+    expect(underneath).not.toHaveBeenCalled();
+    expect(s.api.act).toHaveBeenCalledTimes(1);
+    expect(s.api.act).toHaveBeenCalledWith('POST', '/api/screen/wake', undefined);
+    expect(overlay.classList.contains('is-dim')).toBe(false);
+  });
+
+  it('does not return home on idle while photos is showing, but still does from tasks', async () => {
+    ({ shell } = setup());
+    shell.router.go('photos');
+    await vi.advanceTimersByTimeAsync(300000);
+    expect(shell.router.current()).toBe('photos');
+    shell.router.go('tasks');
+    document.dispatchEvent(new Event('pointerdown'));
+    await vi.advanceTimersByTimeAsync(121000);
+    expect(shell.router.current()).toBe('home');
   });
 
   it('shows an offline pill with the last updated time when stale', async () => {

@@ -19,6 +19,15 @@ describe('home view', () => {
   beforeEach(() => { vi.useFakeTimers(); });
   afterEach(() => { vi.useRealTimers(); document.body.innerHTML = ''; });
 
+  it('weather tile is inert: no data-go, and clicking it does not navigate', () => {
+    const { el, ctx } = setup();
+    const tile = el.querySelector('.weather');
+    expect(tile.hasAttribute('data-go')).toBe(false);
+    tile.click();
+    el.querySelector('.weather .lbl').click();
+    expect(ctx.go).not.toHaveBeenCalled();
+  });
+
   it('hero shows the next event, and leave-by when travel is set', () => {
     let s = setup();
     expect(s.el.querySelector('.hero h3').textContent).toBe('Stand-up');

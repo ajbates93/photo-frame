@@ -106,7 +106,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: var(--h-w); margin: 0; }
   pointer-events: none;
   transition: opacity .4s ease;
 }
-#overlay.is-dim { opacity: .75; }
+#overlay.is-dim { opacity: .75; pointer-events: auto; }
 #overlay.is-off { opacity: 1; pointer-events: auto; }
 
 /* ---- toasts ---- */

@@ -27,7 +27,7 @@ const SKELETON = `
     <div class="t photo" data-go="photos"><div class="shade"></div><div class="cap"></div></div>
     <div class="t plugs"></div>
   </div>
-  <div class="t weather" data-go="control"></div>
+  <div class="t weather"></div>
   <div class="t agenda" data-go="calendar">
     <div></div><div class="ag-h today"></div><div class="ag-h"></div>
     <div class="gutter">${gutterHtml()}</div>
