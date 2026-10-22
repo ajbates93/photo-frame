@@ -1,7 +1,7 @@
 /* Colours from the approved mockup (.theme-paper / .theme-night). */
 :root {
-  --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
-  --sans: 'Archivo Variable', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --display: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+  --sans: 'DM Sans Variable', -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --clock-w: 400;
   --h-w: 400;
   --hero-bg: var(--fam);

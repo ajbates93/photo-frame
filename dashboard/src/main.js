@@ -1,5 +1,6 @@
-import '@fontsource/instrument-serif/latin-400.css';
-import '@fontsource-variable/archivo/wght.css';
+import '@fontsource/dm-serif-display/latin-400.css';
+import '@fontsource/dm-serif-display/latin-400-italic.css';
+import '@fontsource-variable/dm-sans/wght.css';
 import './css/tokens.css';
 import './css/base.css';
 import { createStore } from './store.js';
@@ -275,6 +276,7 @@ if (import.meta.env.MODE !== 'test') {
     const { now: pinned, ...rest } = devFlags(location.search);
     Object.assign(opts, rest);
     if (pinned) opts.now = () => new Date(pinned.getTime());
+    import('./dev/font-picker.js').then((m) => m.mountFontPicker());
   }
   boot(opts);
 }

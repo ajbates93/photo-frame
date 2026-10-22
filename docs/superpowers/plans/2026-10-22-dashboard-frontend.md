@@ -23,7 +23,7 @@
 - No secrets in the front end, fixtures or repo. Fixtures use generic place names, never the household's real town or addresses.
 - All times display in `Europe/London`. The time format is `8:42am` / `5:30pm` (lowercase, no space). Tests run with `TZ=Europe/London`.
 - Every `State` field the spec marks optional (`weather`, `speaker`, `claude.usage`, a photo's `takenAt` and `place`) can be `null`. Views render a placeholder for a null field and never throw.
-- Themes: `paper` by day and `night` between sunset and sunrise, with a 3 s cross-fade. Both themes use Instrument Serif for headings.
+- Themes: `paper` by day and `night` between sunset and sunrise, with a 3 s cross-fade. Both themes use DM Serif Display for headings.
 - At most two slideshow `<img>` elements are in the DOM at any time.
 
 ## Review Focus
@@ -233,7 +233,7 @@ expect(addDays(day, 1).getDate()).toBe(26); expect(addDays(day, 1).getHours()).t
   - At 12:00, a click on the rail clock sets `data-theme="night"`. With the clock advanced past that day's sunset and then the next sunrise, the theme is `paper` again.
 - [ ] **Step 2: Run** `npx vitest run test/theme.test.js test/shell.test.js`. Expected: FAIL.
 - [ ] **Step 3: Implement.**
-  - `tokens.css` defines `:root[data-theme="paper"]` and `:root[data-theme="night"]` token sets. Take the colours from the approved mockup's `.theme-paper` and `.theme-night` variables, with fonts `--display: 'Instrument Serif'` and `--sans: 'Archivo Variable'`.
+  - `tokens.css` defines `:root[data-theme="paper"]` and `:root[data-theme="night"]` token sets. Take the colours from the approved mockup's `.theme-paper` and `.theme-night` variables, with fonts `--display: 'DM Serif Display'` and `--sans: 'Archivo Variable'`.
   - Theme changes add `theme-fading` for 3 s (opacity cross-fade on `.views`).
   - The rail sits on the left, 96 px wide, with Wes's icons. The rail clock shows `fmtTime`.
   - `main.js` ticks every 30 s to re-render time-dependent bits and re-evaluate the theme.
