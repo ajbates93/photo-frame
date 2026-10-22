@@ -83,6 +83,36 @@ describe('layoutDay', () => {
   });
 });
 
+describe('layoutDay overlap columns', () => {
+  const cols = (specs) => {
+    const bs = layoutDay(
+      specs.map(([id, h1, m1, h2, m2]) => ev(id, d(2026, 10, 22, h1, m1), d(2026, 10, 22, h2, m2))),
+      DAY, NOW,
+    );
+    return Object.fromEntries(bs.map((b) => [b.event.id, [b.col, b.cols]]));
+  };
+
+  it('reuses a free column within a transitive cluster', () => {
+    expect(cols([['A', 9, 0, 11, 0], ['B', 10, 0, 12, 0], ['C', 11, 30, 13, 0]]))
+      .toEqual({ A: [0, 2], B: [1, 2], C: [0, 2] });
+  });
+
+  it('keeps separate clusters independent', () => {
+    expect(cols([['A', 9, 0, 10, 0], ['B', 9, 30, 10, 30], ['C', 14, 0, 15, 0]]))
+      .toEqual({ A: [0, 2], B: [1, 2], C: [0, 1] });
+  });
+
+  it('does not merge back-to-back events', () => {
+    expect(cols([['A', 9, 0, 10, 0], ['B', 10, 0, 11, 0]]))
+      .toEqual({ A: [0, 1], B: [0, 1] });
+  });
+
+  it('uses three columns for three mutually overlapping events', () => {
+    expect(cols([['A', 9, 0, 11, 0], ['B', 9, 30, 11, 0], ['C', 10, 0, 11, 0]]))
+      .toEqual({ A: [0, 3], B: [1, 3], C: [2, 3] });
+  });
+});
+
 describe('allDayOn', () => {
   it('covers [start, end) by date', () => {
     const e = ev('a', d(2026, 10, 26), d(2026, 10, 29), { allDay: true });
