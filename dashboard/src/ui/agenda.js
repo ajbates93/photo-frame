@@ -36,10 +36,13 @@ function blockHtml(b, cal) {
     `width:calc(100% / ${b.cols} - 14px)`,
     color ? `--ev:${color};--ev-bg:${tint(color, 0.16)}` : '--ev:var(--fam);--ev-bg:var(--fam-bg)',
   ].join(';');
-  const cls = `ev${b.past ? ' past' : ''}${oneLine ? ' short' : ''}`;
+  const cls = `ev${b.past ? ' past' : ''}${oneLine ? ' short' : ''}${b.cols > 1 ? ' multi' : ''}`;
   // Clamped blocks sit on a grid edge, so label them with their real time.
   const when = (b.clampedStart || b.clampedEnd) ? fmtRange(start, end) : fmtTime(start);
-  const inner = oneLine
+  // Side-by-side blocks are narrow: the title may wrap and the time line is dropped.
+  const inner = b.cols > 1
+    ? `<b>${esc(e.title)}</b>`
+    : oneLine
     ? `<b>${esc(e.title)}</b><span>· ${when}</span>`
     : `<b>${esc(e.title)}</b><span>${fmtRange(start, end)}${e.location ? ` · ${esc(e.location)}` : ''}</span>`;
   return `<div class="${cls}" data-eid="${esc(e.id)}" style="${style}">${inner}</div>`;

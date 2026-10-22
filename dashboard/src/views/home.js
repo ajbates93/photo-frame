@@ -7,6 +7,7 @@ import { photoCaption } from '../lib/captions.js';
 import { createSlideshow } from '../ui/slideshow.js';
 import { icon } from '../ui/icons.js';
 import { esc, setHtml } from '../ui/html.js';
+import { showUnavailable, OFFLINE_MESSAGE } from '../ui/unavailable.js';
 import { gutterHtml, hourLinesHtml, dayItemsHtml } from '../ui/agenda.js';
 
 const CLIP = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
@@ -161,6 +162,18 @@ export function createHomeView() {
 
     hide() {
       slideshow.stop();
+    },
+
+    // First load failed and there is no state: keep the clock, show a short placeholder per tile.
+    offline(c) {
+      ctx = c;
+      state = null;
+      this.update({}, c);
+      setHtml($('.hero'), `<div class="main"><div class="lbl">Next up</div><h3>${esc(OFFLINE_MESSAGE)}</h3></div>`);
+      $('.hero').classList.remove('empty');
+      setHtml($('.tasks'), '<div class="lbl">Tasks</div><div class="count-big">\u2014</div>');
+      setHtml($('.shopping'), '<div class="lbl">Shopping</div><div class="count-big">\u2014</div>');
+      showUnavailable($('.agenda'), 'Calendar unavailable');
     },
 
     update(s, c) {

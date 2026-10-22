@@ -7,6 +7,7 @@ import { api as realApi } from './api.js';
 import { createRouter } from './router.js';
 import { themeFor, nextBoundary } from './lib/theme.js';
 import { fmtTime } from './lib/time.js';
+import { showUnavailable, clearUnavailable } from './ui/unavailable.js';
 import { icon } from './ui/icons.js';
 import { createHomeView } from './views/home.js';
 import { createCalendarView } from './views/calendar.js';
@@ -185,7 +186,16 @@ export function boot({
     applyTheme();
     renderOverlay(snap.state);
     renderStale(snap);
-    if (snap.state) Object.values(viewMap).forEach((v) => v.update(snap.state, ctx));
+    if (snap.state) {
+      clearUnavailable(doc);
+      Object.values(viewMap).forEach((v) => v.update(snap.state, ctx));
+    } else if (snap.error) {
+      Object.entries(viewMap).forEach(([name, v]) => {
+        if (v.offline) { v.offline(ctx); return; }
+        const el = doc.querySelector(`[data-view="${name}"]`);
+        if (el) showUnavailable(el);
+      });
+    }
   }
 
   // Off overlay: it covers the screen, so the next tap lands on it, wakes the frame

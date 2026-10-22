@@ -147,3 +147,38 @@ describe('home view', () => {
     view.hide();
   });
 });
+
+describe('home view offline (no state yet)', () => {
+  afterEach(() => { document.body.innerHTML = ''; });
+
+  it('keeps the clock and shows a placeholder in every tile', () => {
+    const el = document.createElement('section');
+    document.body.appendChild(el);
+    const ctx = { now: () => NOW, act: vi.fn(), go: vi.fn(), toast: vi.fn() };
+    const view = createHomeView();
+    view.mount(el, ctx);
+    view.offline(ctx);
+    expect(el.querySelector('.clock .time').textContent).toContain('8:42');
+    expect(el.querySelector('.hero').textContent).toContain("Can't reach the home server");
+    expect(el.querySelector('.weather').textContent).toContain('Weather unavailable');
+    expect(el.querySelector('.agenda .unavailable').textContent).toBe('Calendar unavailable');
+    expect(el.querySelector('.claude').textContent).toContain('Usage unavailable');
+    expect(el.querySelector('.tasks .count-big').textContent).toBe('—');
+    expect(el.querySelector('.shopping .count-big').textContent).toBe('—');
+  });
+});
+
+describe('agenda overlapping blocks', () => {
+  afterEach(() => { document.body.innerHTML = ''; });
+
+  it('gives side-by-side blocks the wrapping class and no time line; single blocks are unchanged', () => {
+    const { el } = setup(new Date(2026, 9, 22, 17, 0));
+    const evs = [...el.querySelectorAll('.agenda .col')[0].querySelectorAll('.ev')];
+    const multi = evs.filter((e) => e.classList.contains('multi'));
+    expect(multi.length).toBeGreaterThanOrEqual(2);
+    multi.forEach((e) => expect(e.querySelector('span')).toBeNull());
+    const single = evs.filter((e) => !e.classList.contains('multi'));
+    expect(single.length).toBeGreaterThan(0);
+    single.forEach((e) => expect(e.querySelector('span')).not.toBeNull());
+  });
+});

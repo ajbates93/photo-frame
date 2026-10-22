@@ -180,3 +180,25 @@ describe('shell', () => {
     expect(document.getElementById('toasts').textContent).toBe('');
   });
 });
+
+describe('shell offline placeholders', () => {
+  afterEach(() => { document.body.innerHTML = ''; });
+
+  it('shows the unreachable message in views without state and clears it on recovery', async () => {
+    document.body.innerHTML = body;
+    let fail = true;
+    const state = makeFixtureState(new Date());
+    const api = { getState: async () => state, act: vi.fn() };
+    const store = createStore({ load: async () => { if (fail) throw new Error('down'); return state; } });
+    const views = Object.fromEntries(['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude']
+      .map((n) => [n, { mount: vi.fn(), update: vi.fn() }]));
+    const shell = boot({ doc: document, store, api, views });
+    await store.refresh();
+    const el = document.querySelector('[data-view="tasks"]');
+    expect(el.querySelector('.unavailable').textContent).toContain("Can't reach the home server");
+    fail = false;
+    await store.refresh();
+    expect(document.querySelector('.unavailable')).toBeNull();
+    shell.stop();
+  });
+});
