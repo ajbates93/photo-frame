@@ -58,7 +58,7 @@ export function hoursSinceDayStart(d, day) {
 
 // "resets in" form: 38m, 1h 18m, 3d 2h.
 export function fmtResetsIn(mins) {
-  const total = Math.max(0, Math.round(mins));
+  const total = Number.isFinite(mins) ? Math.max(0, Math.round(mins)) : 0;
   const d = Math.floor(total / 1440);
   const h = Math.floor((total % 1440) / 60);
   const m = total % 60;

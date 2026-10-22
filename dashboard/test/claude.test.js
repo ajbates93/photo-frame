@@ -42,6 +42,21 @@ describe('claude view', () => {
     expect(el.querySelector('.cl-meter')).toBeNull();
   });
 
+  it('shows Usage unavailable when a meter is missing or malformed', () => {
+    for (const tweak of [
+      (u) => { u.session = null; },
+      (u) => { delete u.weekly; },
+      (u) => { u.weekly.resetsAt = 'never'; },
+      (u) => { u.session.pct = null; },
+    ]) {
+      const { el } = setup((s) => tweak(s.claude.usage));
+      expect(el.querySelector('.cl-usage').textContent).toBe('Usage unavailable');
+      expect(el.textContent).not.toContain('NaN');
+      expect(el.querySelector('.cl-plan').textContent).toBe('Max plan');
+      document.body.innerHTML = '';
+    }
+  });
+
   it('shows 42% resetting in 1h 18m with an even-pace marker at 74%', () => {
     const { el } = setup();
     const m = el.querySelector('.cl-meter');

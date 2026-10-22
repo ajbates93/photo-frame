@@ -1,4 +1,5 @@
 import { createStore } from '../src/store.js';
+import { api, REQUEST_TIMEOUT_MS } from '../src/api.js';
 
 describe('store', () => {
   it('emits a state after the first refresh', async () => {
@@ -69,5 +70,60 @@ describe('store', () => {
     resolve({ generatedAt: 'older' });
     await p;
     expect(store.get().state).toEqual({ generatedAt: 'newer' });
+  });
+
+  it('does not start a second poll while a load is still in flight', async () => {
+    vi.useFakeTimers();
+    let resolve;
+    const load = vi.fn(() => new Promise((r) => { resolve = r; }));
+    const store = createStore({ load, intervalMs: 1000 });
+    const off = store.subscribe(() => {});
+    await vi.advanceTimersByTimeAsync(3500);
+    expect(load).toHaveBeenCalledTimes(1);
+    resolve({ generatedAt: 'a' });
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(load).toHaveBeenCalledTimes(2);
+    off();
+    vi.useRealTimers();
+  });
+
+  it('keeps notifying other subscribers when one throws', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const store = createStore({ load: async () => ({}) });
+    const after = vi.fn();
+    const offA = store.subscribe(() => { throw new Error('bad view'); });
+    const offB = store.subscribe(after);
+    expect(() => store.set({ generatedAt: 'x' })).not.toThrow();
+    expect(after).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalled();
+    offA(); offB();
+    spy.mockRestore();
+  });
+});
+
+describe('api timeout', () => {
+  afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });
+
+  it('rejects a hung request after the timeout so the store goes stale', async () => {
+    vi.useFakeTimers();
+    let signal = null;
+    vi.stubGlobal('fetch', vi.fn((path, init) => { signal = init.signal; return new Promise(() => {}); }));
+    expect(REQUEST_TIMEOUT_MS).toBe(8000);
+    const store = createStore({ load: () => api.getState() });
+    const p = store.refresh();
+    await vi.advanceTimersByTimeAsync(7900);
+    expect(store.get().stale).toBe(false);
+    await vi.advanceTimersByTimeAsync(200);
+    await p;
+    expect(store.get()).toMatchObject({ stale: true, error: 'Request timed out' });
+    expect(signal.aborted).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('clears its timer when the request completes', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => ({ generatedAt: 'a' }) })));
+    await expect(api.getState()).resolves.toEqual({ generatedAt: 'a' });
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

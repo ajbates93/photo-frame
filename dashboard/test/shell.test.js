@@ -181,6 +181,45 @@ describe('shell', () => {
   });
 });
 
+describe('shell view isolation', () => {
+  afterEach(() => { vi.useRealTimers(); document.body.innerHTML = ''; });
+
+  it('a throwing view does not stop the others or turn a successful act into false', async () => {
+    vi.useFakeTimers();
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    document.body.innerHTML = body;
+    const state = makeFixtureState(new Date());
+    const store = createStore({ load: async () => state });
+    const api = { act: vi.fn(async () => ({ ...state, tasks: [] })), getState: async () => state };
+    const views = Object.fromEntries(['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude']
+      .map((n) => [n, { mount: vi.fn(), update: vi.fn() }]));
+    views.home.update.mockImplementation(() => { throw new Error('home broke'); });
+    const shell = boot({ doc: document, store, api, views });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(views.calendar.update).toHaveBeenCalled();
+    const before = views.claude.update.mock.calls.length;
+    await expect(shell.ctx.act('PATCH', '/api/tasks/x', { done: true })).resolves.toBe(true);
+    expect(views.claude.update.mock.calls.length).toBeGreaterThan(before);
+    expect(spy).toHaveBeenCalled();
+    shell.stop();
+    spy.mockRestore();
+  });
+
+  it('a throwing offline() does not stop the other placeholders', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    document.body.innerHTML = body;
+    const store = createStore({ load: async () => { throw new Error('down'); } });
+    const views = Object.fromEntries(['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude']
+      .map((n) => [n, { mount: vi.fn(), update: vi.fn() }]));
+    views.home.offline = vi.fn(() => { throw new Error('offline broke'); });
+    const shell = boot({ doc: document, store, api: { act: vi.fn(), getState: vi.fn() }, views });
+    await store.refresh();
+    expect(document.querySelector('[data-view="tasks"] .unavailable')).not.toBeNull();
+    shell.stop();
+    spy.mockRestore();
+  });
+});
+
 describe('shell offline placeholders', () => {
   afterEach(() => { document.body.innerHTML = ''; });
 

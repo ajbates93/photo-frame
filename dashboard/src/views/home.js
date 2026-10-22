@@ -4,6 +4,7 @@ import {
   fmtTime, fmtHour, fmtRange, fmtDay, fmtDate, fmtCountdown, dayStart, addDays,
 } from '../lib/time.js';
 import { photoCaption } from '../lib/captions.js';
+import { usableUsage } from '../lib/usage.js';
 import { createSlideshow } from '../ui/slideshow.js';
 import { icon } from '../ui/icons.js';
 import { esc, setHtml } from '../ui/html.js';
@@ -96,7 +97,7 @@ function claudeHtml(claude, now) {
   const needs = sessions.some((s) => s.state === 'waiting');
   const head = `<div class="head"><div class="lbl">Claude${usage && usage.plan ? ` · ${esc(usage.plan)} plan` : ''}</div>`
     + `${needs ? '<span class="needs">Needs you</span>' : ''}</div>`;
-  if (!usage) return `${head}<div class="placeholder">Usage unavailable</div>`;
+  if (!usableUsage(usage)) return `${head}<div class="placeholder">Usage unavailable</div>`;
   const meter = (label, m, reset) => {
     const pct = Math.max(0, Math.min(100, Math.round(m.pct)));
     return `<div class="meter"><div class="meter-top"><span>${label}</span><b>${pct}% · resets ${reset}</b></div>`

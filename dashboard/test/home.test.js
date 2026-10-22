@@ -81,6 +81,20 @@ describe('home view', () => {
     expect(el.querySelector('.claude').textContent).toContain('Usage unavailable');
   });
 
+  it('treats usage without a session or weekly meter as unavailable', () => {
+    for (const usage of [
+      { plan: 'Max', session: null, weekly: { pct: 61, resetsAt: NOW.toISOString() } },
+      { plan: 'Max', session: { pct: 42, resetsAt: NOW.toISOString() } },
+      { plan: 'Max', session: { pct: 'x', resetsAt: NOW.toISOString() }, weekly: { pct: 61, resetsAt: NOW.toISOString() } },
+      { plan: 'Max', session: { pct: 42, resetsAt: 'soon' }, weekly: { pct: 61, resetsAt: NOW.toISOString() } },
+    ]) {
+      const { el } = setup(NOW, (st) => { st.claude.usage = usage; });
+      expect(el.querySelector('.claude').textContent).toContain('Usage unavailable');
+      expect(el.querySelector('.claude').textContent).not.toContain('NaN');
+      document.body.innerHTML = '';
+    }
+  });
+
   it('truncates long titles with an ellipsis', () => {
     const long = 'A'.repeat(60);
     const { el } = setup(NOW, (st) => { st.events[1].title = long; });

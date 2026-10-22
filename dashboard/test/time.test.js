@@ -59,5 +59,7 @@ describe('fmtResetsIn', () => {
     expect(fmtResetsIn(120)).toBe('2h 0m');
     expect(fmtResetsIn(3 * 1440 + 125)).toBe('3d 2h');
     expect(fmtResetsIn(-5)).toBe('0m');
+    expect(fmtResetsIn(NaN)).toBe('0m');
+    expect(fmtResetsIn(Infinity)).toBe('0m');
   });
 });

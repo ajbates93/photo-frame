@@ -103,15 +103,18 @@ export function boot({
     return theStore.get();
   }
 
+  // Resolves true once the server accepted the action; a view failing to render the
+  // new state is logged by the store and never turns this into false.
   async function act(method, path, body) {
+    let next;
     try {
-      const next = await api.act(method, path, body);
-      theStore.set(next);
-      return true;
+      next = await api.act(method, path, body);
     } catch (e) {
       toast((e && e.message) || 'Something went wrong');
       return false;
     }
+    theStore.set(next);
+    return true;
   }
 
   const router = createRouter(doc, viewMap, { ctx: () => ctx });
@@ -186,15 +189,19 @@ export function boot({
     applyTheme();
     renderOverlay(snap.state);
     renderStale(snap);
+    // Each view renders in isolation: one throwing must not blank the rest.
+    const guard = (name, fn) => {
+      try { fn(); } catch (e) { console.error(`View "${name}" failed to render`, e); }
+    };
     if (snap.state) {
       clearUnavailable(doc);
-      Object.values(viewMap).forEach((v) => v.update(snap.state, ctx));
+      Object.entries(viewMap).forEach(([name, v]) => guard(name, () => v.update(snap.state, ctx)));
     } else if (snap.error) {
-      Object.entries(viewMap).forEach(([name, v]) => {
+      Object.entries(viewMap).forEach(([name, v]) => guard(name, () => {
         if (v.offline) { v.offline(ctx); return; }
         const el = doc.querySelector(`[data-view="${name}"]`);
         if (el) showUnavailable(el);
-      });
+      }));
     }
   }
 

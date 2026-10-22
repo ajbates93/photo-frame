@@ -1,5 +1,6 @@
 import '../css/views/claude.css';
 import { fmtCountdown, fmtResetsIn } from '../lib/time.js';
+import { usableUsage } from '../lib/usage.js';
 import { esc, setHtml } from '../ui/html.js';
 
 const SESSION_WINDOW_MINS = 5 * 60;
@@ -32,7 +33,7 @@ function meterHtml(label, m, windowMins, now) {
 }
 
 function usageHtml(usage, now) {
-  if (!usage) return '<div class="cl-none">Usage unavailable</div>';
+  if (!usableUsage(usage)) return '<div class="cl-none">Usage unavailable</div>';
   return meterHtml('Session', usage.session, SESSION_WINDOW_MINS, now)
     + meterHtml('Weekly', usage.weekly, WEEKLY_WINDOW_MINS, now);
 }
