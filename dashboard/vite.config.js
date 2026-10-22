@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
+import { mockApi } from './dev/mock-api.js';
 
 export default defineConfig({
-  // Mock-API plugin slot (added in a later task): plugins: [mockApi()]
-  plugins: [],
+  plugins: [mockApi()], // serve mode only (apply: 'serve')
   build: {
     target: 'chrome106',
     cssTarget: 'chrome61',
