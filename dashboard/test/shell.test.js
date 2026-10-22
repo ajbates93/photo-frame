@@ -43,6 +43,21 @@ describe('shell', () => {
     expect(shell.router.current()).toBe('shopping');
   });
 
+  it('calls hide() on the outgoing view and show() on the incoming one', () => {
+    let s;
+    ({ shell, ...s } = setup());
+    s.views.home.show = vi.fn();
+    s.views.home.hide = vi.fn();
+    s.views.tasks.show = vi.fn();
+    shell.router.go('tasks');
+    expect(s.views.home.hide).toHaveBeenCalledTimes(1);
+    expect(s.views.tasks.show).toHaveBeenCalledTimes(1);
+    shell.router.go('tasks');
+    expect(s.views.tasks.show).toHaveBeenCalledTimes(1);
+    shell.router.go('home');
+    expect(s.views.home.show).toHaveBeenCalledTimes(1);
+  });
+
   it('off overlay wakes once on a tap, cancels no events, and hides the view underneath from clicks', async () => {
     let s;
     ({ shell, ...s } = setup({ mode: 'off' }));

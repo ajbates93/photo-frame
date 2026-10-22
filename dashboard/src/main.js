@@ -97,7 +97,7 @@ export function boot({
     }
   }
 
-  const router = createRouter(doc, viewMap);
+  const router = createRouter(doc, viewMap, { ctx: () => ctx });
   const ctx = { now, act, go: (name) => go(name), toast };
 
   function go(name) {

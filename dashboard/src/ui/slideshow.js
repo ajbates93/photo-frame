@@ -23,7 +23,7 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
     im.alt = '';
     im.className = 'ss-img';
     im.addEventListener('error', () => im.classList.add('is-broken'));
-    el.appendChild(im);
+    el.insertBefore(im, el.firstChild); // under any caption shade the caller adds
     return im;
   });
   let front = 0;
@@ -32,6 +32,7 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
   let timer = null;
   let shown = false;
   let token = 0;
+  let loadTimer = null;
 
   function take() {
     if (!queue.length) {
@@ -61,7 +62,8 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
     };
     back.addEventListener('load', show, { once: true });
     back.addEventListener('error', show, { once: true });
-    setTimeout(show, LOAD_TIMEOUT_MS);
+    clearTimeout(loadTimer);
+    loadTimer = setTimeout(show, LOAD_TIMEOUT_MS);
     back.src = photo.url;
   }
 
@@ -90,6 +92,8 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
     },
     stop() {
       clearInterval(timer);
+      clearTimeout(loadTimer);
+      loadTimer = null;
       timer = null;
     },
   };

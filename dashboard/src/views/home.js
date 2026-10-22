@@ -110,13 +110,13 @@ function blockHtml(b, cal) {
   const start = new Date(e.start);
   const end = new Date(e.end);
   const oneLine = b.short || b.clampedStart || b.clampedEnd;
-  const color = (cal && cal.color) || null;
+  const color = cal && /^#[0-9a-f]{6}$/i.test(cal.color || '') ? cal.color : null;
   const style = [
     `top:calc(${b.topPct.toFixed(3)}% + 1px)`,
     `height:calc(${b.heightPct.toFixed(3)}% - 3px)`,
     `left:calc(${b.col} / ${b.cols} * 100% + 6px)`,
     `width:calc(100% / ${b.cols} - 14px)`,
-    color ? `--ev:${color};--ev-bg:${tint(color, 0.16) || 'var(--fam-bg)'}` : '--ev:var(--fam);--ev-bg:var(--fam-bg)',
+    color ? `--ev:${color};--ev-bg:${tint(color, 0.16)}` : '--ev:var(--fam);--ev-bg:var(--fam-bg)',
   ].join(';');
   const cls = `ev${b.past ? ' past' : ''}${oneLine ? ' short' : ''}`;
   // Clamped blocks sit on a grid edge, so label them with their real time.
@@ -223,7 +223,15 @@ export function createHomeView() {
       slideshow = createSlideshow($('.photo'), {
         onChange: (p) => { current = p; renderCaption(); },
       });
+    },
+
+    show(c) {
+      if (c) ctx = c;
       slideshow.start();
+    },
+
+    hide() {
+      slideshow.stop();
     },
 
     update(s, c) {

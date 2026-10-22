@@ -119,4 +119,31 @@ describe('home view', () => {
     expect(el.querySelector('.photo img')).toBe(first);
     expect(el.querySelectorAll('.photo img').length).toBeLessThanOrEqual(2);
   });
+
+  it('puts the slideshow images under the caption shade', () => {
+    const { el } = setup();
+    const photo = el.querySelector('.photo');
+    const kids = [...photo.children];
+    const shade = kids.indexOf(photo.querySelector('.shade'));
+    kids.filter((k) => k.tagName === 'IMG').forEach((im) => expect(kids.indexOf(im)).toBeLessThan(shade));
+  });
+
+  it('ignores a malicious calendar colour', () => {
+    const { el } = setup(NOW, (st) => { st.calendars[0].color = 'red;"><b id="x">'; });
+    expect(el.querySelector('#x')).toBeNull();
+    const ev = [...el.querySelectorAll('.ev')].find((e) => e.textContent.includes('Stand-up'));
+    expect(ev.getAttribute('style')).toContain('var(--fam)');
+  });
+
+  it('stops the slideshow timers on hide and restarts on show', () => {
+    const { view, ctx } = setup();
+    expect(vi.getTimerCount()).toBe(0);
+    view.show(ctx);
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    view.hide();
+    expect(vi.getTimerCount()).toBe(0);
+    view.show(ctx);
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    view.hide();
+  });
 });
