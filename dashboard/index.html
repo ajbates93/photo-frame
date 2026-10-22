@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280, initial-scale=1, user-scalable=no">
+  <title>Family dashboard</title>
+</head>
+<body>
+  <nav class="rail">
+    <button type="button" data-go="home">Home</button>
+    <button type="button" data-go="calendar">Calendar</button>
+    <button type="button" data-go="tasks">Tasks</button>
+    <button type="button" data-go="shopping">Shopping</button>
+    <button type="button" data-go="photos">Photos</button>
+    <button type="button" data-go="control">Control</button>
+    <button type="button" data-go="claude">Claude</button>
+  </nav>
+  <main>
+    <section class="view" data-view="home"></section>
+    <section class="view" data-view="calendar"></section>
+    <section class="view" data-view="tasks"></section>
+    <section class="view" data-view="shopping"></section>
+    <section class="view" data-view="photos"></section>
+    <section class="view" data-view="control"></section>
+    <section class="view" data-view="claude"></section>
+  </main>
+  <div id="overlay"></div>
+  <div id="toasts"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
