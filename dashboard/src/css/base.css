@@ -11,7 +11,6 @@ html, body {
   font-size: 16px;
   -webkit-user-select: none;
   user-select: none;
-  transition: background-color 3s ease, color 3s ease;
 }
 
 body { position: relative; display: flex; }
@@ -26,7 +25,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: var(--h-w); margin: 0; }
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 12px 8px 0;
+  padding: 12px 8px 64px; /* keep the clock above the bottom 64 px dead zone */
   background: var(--card);
   border-right: var(--line-w) solid var(--line);
 }
@@ -48,7 +47,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: var(--h-w); margin: 0; }
 .rail-item.is-active:active { opacity: .85; }
 .rail-clock {
   margin-top: auto;
-  height: 84px;
+  height: 72px;
   text-align: center;
   font-family: var(--display);
   font-size: 22px;
@@ -64,8 +63,9 @@ h1, h2, h3 { font-family: var(--display); font-weight: var(--h-w); margin: 0; }
 .view.is-active { display: block; }
 .placeholder-title { font-size: 44px; }
 
-.theme-fading .views { animation: theme-fade 3s ease; }
-@keyframes theme-fade { from { opacity: .3; } to { opacity: 1; } }
+.theme-fading *:not(#overlay) {
+  transition: background-color 3s ease, color 3s ease, border-color 3s ease;
+}
 
 /* ---- stale pill ---- */
 #stale {

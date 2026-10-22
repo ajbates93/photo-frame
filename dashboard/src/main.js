@@ -64,6 +64,8 @@ export function boot({
   let fadeTimer = null;
   let idleTimer = null;
   let lastOk = null;
+  let waking = false;
+  const toastTimers = new Set();
   const life = new AbortController();
   const on = { capture: true, signal: life.signal };
 
@@ -74,7 +76,8 @@ export function boot({
     t.className = 'toast';
     t.textContent = msg;
     toasts.appendChild(t);
-    setTimeout(() => t.remove(), TOAST_MS);
+    const id = setTimeout(() => { toastTimers.delete(id); t.remove(); }, TOAST_MS);
+    toastTimers.add(id);
   }
 
   function snapshot() {
@@ -165,18 +168,17 @@ export function boot({
     if (snap.state) Object.values(viewMap).forEach((v) => v.update(snap.state, ctx));
   }
 
-  // Off overlay: the next tap wakes the screen and never reaches the control underneath.
-  const swallow = (e) => {
-    const s = snapshot().state;
-    if (!s || !s.screen || s.screen.mode !== 'off') return false;
-    e.preventDefault();
-    e.stopPropagation();
-    return true;
-  };
-  doc.addEventListener('click', (e) => { if (swallow(e)) act('POST', '/api/screen/wake'); }, on);
-  ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend'].forEach((type) => {
-    doc.addEventListener(type, swallow, on);
-  });
+  // Off overlay: it covers the screen, so the next tap lands on it, wakes the frame
+  // and never reaches the control underneath. Touch/mouse/pointer events are not cancelled.
+  function wake(e) {
+    if (!overlay.classList.contains('is-off')) return;
+    if (e.type === 'click') e.stopPropagation();
+    if (waking) return;
+    waking = true;
+    act('POST', '/api/screen/wake').finally(() => { waking = false; });
+  }
+  overlay.addEventListener('pointerup', wake, { signal: life.signal });
+  overlay.addEventListener('click', wake, { signal: life.signal });
 
   // Rail navigation and idle return.
   doc.querySelectorAll('[data-go]').forEach((el) => {
@@ -191,14 +193,22 @@ export function boot({
     if (el) v.mount(el, ctx);
   });
 
-  theStore.subscribe(render);
+  const unsubscribe = theStore.subscribe(render);
   const tick = setInterval(render, TICK_MS);
   go('home');
   applyTheme();
   render();
   theStore.refresh();
 
-  return { router, ctx, store: theStore, stop() { life.abort(); clearInterval(tick); clearTimeout(idleTimer); } };
+  return { router, ctx, store: theStore, stop() {
+      life.abort();
+      unsubscribe();
+      clearInterval(tick);
+      clearTimeout(idleTimer);
+      clearTimeout(fadeTimer);
+      toastTimers.forEach(clearTimeout);
+      toastTimers.clear();
+    } };
 }
 
 if (import.meta.env.MODE !== 'test') {

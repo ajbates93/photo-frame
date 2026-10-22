@@ -43,20 +43,38 @@ describe('shell', () => {
     expect(shell.router.current()).toBe('shopping');
   });
 
-  it('off overlay is swallowed and wakes the screen', async () => {
+  it('off overlay wakes once on a tap, cancels no events, and hides the view underneath from clicks', async () => {
     let s;
     ({ shell, ...s } = setup({ mode: 'off' }));
     await flush();
     const overlay = document.getElementById('overlay');
     expect(overlay.classList.contains('is-off')).toBe(true);
     const underneath = vi.fn();
-    const btn = document.querySelector('[data-view="home"]');
-    btn.addEventListener('click', underneath);
-    btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    document.querySelector('[data-view="home"]').addEventListener('click', underneath);
+    const evs = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click'].map((t) => {
+      const e = new Event(t, { bubbles: true, cancelable: true });
+      overlay.dispatchEvent(e);
+      return e;
+    });
     await flush();
+    expect(evs.every((e) => !e.defaultPrevented)).toBe(true);
     expect(underneath).not.toHaveBeenCalled();
+    expect(s.api.act).toHaveBeenCalledTimes(1);
     expect(s.api.act).toHaveBeenCalledWith('POST', '/api/screen/wake', undefined);
     expect(overlay.classList.contains('is-off')).toBe(false);
+  });
+
+  it('stop() unsubscribes from the store and ends rendering', async () => {
+    let s;
+    ({ shell, ...s } = setup());
+    await flush();
+    let renders = 0;
+    s.views.home.update.mockImplementation(() => { renders += 1; });
+    shell.stop();
+    await s.store.refresh();
+    await vi.advanceTimersByTimeAsync(120000);
+    expect(renders).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('dim overlay does not swallow taps', async () => {
