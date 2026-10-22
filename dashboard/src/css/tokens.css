@@ -1,0 +1,29 @@
+/* Colours from the approved mockup (.theme-paper / .theme-night). */
+:root {
+  --display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --sans: 'Archivo Variable', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --clock-w: 400;
+  --h-w: 400;
+  --hero-bg: var(--fam);
+}
+
+:root[data-theme="paper"] {
+  --bg: #efe9dd; --card: #fffcf6; --ink: #24211c; --muted: #8b8377;
+  --line: transparent; --line-w: 0px; --r: 18px; --shadow: 0 1px 2px rgba(60, 40, 10, .06);
+  --me: #3c6fd1; --me-bg: #e7eefb; --fam: #d9772e; --fam-bg: #fbeadc; --accent: #d9772e; --now: #d6453a;
+  --grid: #e7e0d2; --grid-faint: #f0eadf; --grid-strong: #d6ccb8; --chip: #f2ece1; --on: #f3cf63;
+  --claude-bg: #c96442; --claude-ink: #fff; --claude-muted: #f6d6c8;
+  --claude-track: rgba(255, 255, 255, .25); --claude-fill: #fff; --needs-bg: #fff; --needs-ink: #b5532f;
+  --hero-bg: #d9772e;
+}
+
+:root[data-theme="night"] {
+  --bg: #0e1013; --card: #181b20; --ink: #ece8e1; --muted: #8a8f98;
+  --line: #262a31; --line-w: 1px; --r: 16px; --shadow: none;
+  --me: #6f9bff; --me-bg: rgba(111, 155, 255, .16); --fam: #f0954a; --fam-bg: rgba(240, 149, 74, .17);
+  --accent: #f0954a; --now: #ff5d52;
+  --grid: #262a31; --grid-faint: #1f2228; --grid-strong: #363b44; --chip: #22262d; --on: #f3cf63;
+  --claude-bg: #2a1c16; --claude-ink: #f4e6de; --claude-muted: #d98c6c;
+  --claude-track: rgba(255, 255, 255, .1); --claude-fill: #d97757; --needs-bg: #d97757; --needs-ink: #1a0f0a;
+  --hero-bg: linear-gradient(135deg, #b45f22, #e08a3e);
+}

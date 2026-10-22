@@ -6,16 +6,17 @@
   <title>Family dashboard</title>
 </head>
 <body>
-  <nav class="rail">
-    <button type="button" data-go="home">Home</button>
-    <button type="button" data-go="calendar">Calendar</button>
-    <button type="button" data-go="tasks">Tasks</button>
-    <button type="button" data-go="shopping">Shopping</button>
-    <button type="button" data-go="photos">Photos</button>
-    <button type="button" data-go="control">Control</button>
-    <button type="button" data-go="claude">Claude</button>
+  <nav class="rail" aria-label="Sections">
+    <button type="button" class="rail-item" data-go="home"><span class="rail-icon" data-icon="home"></span><span>Home</span></button>
+    <button type="button" class="rail-item" data-go="calendar"><span class="rail-icon" data-icon="calendar"></span><span>Calendar</span></button>
+    <button type="button" class="rail-item" data-go="tasks"><span class="rail-icon" data-icon="tasks"></span><span>Tasks</span></button>
+    <button type="button" class="rail-item" data-go="shopping"><span class="rail-icon" data-icon="cart"></span><span>Shopping</span></button>
+    <button type="button" class="rail-item" data-go="photos"><span class="rail-icon" data-icon="photo"></span><span>Photos</span></button>
+    <button type="button" class="rail-item" data-go="control"><span class="rail-icon" data-icon="sliders"></span><span>Control</span></button>
+    <button type="button" class="rail-item" data-go="claude"><span class="rail-icon" data-icon="robot"></span><span>Claude</span></button>
+    <button type="button" class="rail-clock" id="railClock" aria-label="Clock: tap to switch theme"></button>
   </nav>
-  <main>
+  <main class="views">
     <section class="view" data-view="home"></section>
     <section class="view" data-view="calendar"></section>
     <section class="view" data-view="tasks"></section>
@@ -24,6 +25,7 @@
     <section class="view" data-view="control"></section>
     <section class="view" data-view="claude"></section>
   </main>
+  <div id="stale"></div>
   <div id="overlay"></div>
   <div id="toasts"></div>
   <script type="module" src="/src/main.js"></script>
