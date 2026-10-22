@@ -1,11 +1,13 @@
 import '../css/views/home.css';
-import { GRID, layoutDay, allDayOn, nextEvent, leaveBy } from '../lib/calendar.js';
+import { nextEvent, leaveBy } from '../lib/calendar.js';
 import {
   fmtTime, fmtHour, fmtRange, fmtDay, fmtDate, fmtCountdown, dayStart, addDays,
 } from '../lib/time.js';
 import { photoCaption } from '../lib/captions.js';
 import { createSlideshow } from '../ui/slideshow.js';
 import { icon } from '../ui/icons.js';
+import { esc, setHtml } from '../ui/html.js';
+import { gutterHtml, hourLinesHtml, dayItemsHtml } from '../ui/agenda.js';
 
 const CLIP = 'white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
 const HERO_FAR_MINS = 100;
@@ -13,41 +15,6 @@ const MAX_PLUGS = 4;
 const COND_ICON = {
   sun: 'sun', partly: 'partly', cloud: 'cloud', rain: 'rain', snow: 'cloud', fog: 'cloud', storm: 'rain', night: 'moon',
 };
-
-const esc = (s) => String(s == null ? '' : s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-function tint(hex, alpha) {
-  const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
-  if (!m) return null;
-  const n = parseInt(m[1], 16);
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-}
-
-function setHtml(el, html) {
-  if (el.__html === html) return;
-  el.__html = html;
-  el.innerHTML = html;
-}
-
-function hourLines() {
-  const span = GRID.endHour - GRID.startHour;
-  let out = '';
-  for (let h = GRID.startHour + 1; h < GRID.endHour; h += 1) {
-    out += `<div class="hl" style="top:${(((h - GRID.startHour) / span) * 100).toFixed(3)}%"></div>`;
-    out += `<div class="hl half" style="top:${(((h - 0.5 - GRID.startHour) / span) * 100).toFixed(3)}%"></div>`;
-  }
-  return out;
-}
-
-function gutter() {
-  const span = GRID.endHour - GRID.startHour;
-  let out = '';
-  for (let h = GRID.startHour + 1; h < GRID.endHour; h += 1) {
-    out += `<div style="top:${(((h - GRID.startHour) / span) * 100).toFixed(3)}%">${fmtHour(h)}</div>`;
-  }
-  return out;
-}
 
 const SKELETON = `
 <div class="home">
@@ -60,9 +27,9 @@ const SKELETON = `
   <div class="t weather" data-go="control"></div>
   <div class="t agenda" data-go="calendar">
     <div></div><div class="ag-h today"></div><div class="ag-h"></div>
-    <div class="gutter">${gutter()}</div>
-    <div class="col">${hourLines()}<div class="items"></div></div>
-    <div class="col d2">${hourLines()}<div class="items"></div></div>
+    <div class="gutter">${gutterHtml()}</div>
+    <div class="col">${hourLinesHtml()}<div class="items"></div></div>
+    <div class="col d2">${hourLinesHtml()}<div class="items"></div></div>
   </div>
   <div class="duo">
     <div class="t tasks" data-go="tasks"></div>
@@ -103,44 +70,6 @@ function weatherHtml(w) {
     + `<div class="wx-top">${icon(COND_ICON[w.cond] || 'cloud', 40)}<span class="wx-temp">${Math.round(w.temp)}°</span>`
     + `<span class="small" style="margin:0"><b>${esc(w.label)}</b><br>H ${Math.round(w.hi)}° · L ${Math.round(w.lo)}°</span></div>`
     + `<div class="wx-say">${esc(w.summary)}</div><div class="hours">${hours}</div>`;
-}
-
-function blockHtml(b, cal) {
-  const e = b.event;
-  const start = new Date(e.start);
-  const end = new Date(e.end);
-  const oneLine = b.short || b.clampedStart || b.clampedEnd;
-  const color = cal && /^#[0-9a-f]{6}$/i.test(cal.color || '') ? cal.color : null;
-  const style = [
-    `top:calc(${b.topPct.toFixed(3)}% + 1px)`,
-    `height:calc(${b.heightPct.toFixed(3)}% - 3px)`,
-    `left:calc(${b.col} / ${b.cols} * 100% + 6px)`,
-    `width:calc(100% / ${b.cols} - 14px)`,
-    color ? `--ev:${color};--ev-bg:${tint(color, 0.16)}` : '--ev:var(--fam);--ev-bg:var(--fam-bg)',
-  ].join(';');
-  const cls = `ev${b.past ? ' past' : ''}${oneLine ? ' short' : ''}`;
-  // Clamped blocks sit on a grid edge, so label them with their real time.
-  const when = (b.clampedStart || b.clampedEnd) ? fmtRange(start, end) : fmtTime(start);
-  const inner = oneLine
-    ? `<b>${esc(e.title)}</b><span>· ${when}</span>`
-    : `<b>${esc(e.title)}</b><span>${fmtRange(start, end)}${e.location ? ` · ${esc(e.location)}` : ''}</span>`;
-  return `<div class="${cls}" style="${style}">${inner}</div>`;
-}
-
-function dayHtml(events, calendars, day, now, isToday) {
-  const calOf = (e) => calendars.find((c) => c.id === e.calendarId);
-  const allDay = allDayOn(events, day)
-    .map((e) => `<div class="allday">${esc(e.title)}</div>`).join('');
-  const blocks = layoutDay(events, day, now).map((b) => blockHtml(b, calOf(b.event))).join('');
-  let nowLine = '';
-  if (isToday) {
-    const h = now.getHours() + now.getMinutes() / 60;
-    if (h >= GRID.startHour && h <= GRID.endHour) {
-      const pct = ((h - GRID.startHour) / (GRID.endHour - GRID.startHour)) * 100;
-      nowLine = `<div class="now" style="top:${pct.toFixed(2)}%"></div>`;
-    }
-  }
-  return (allDay ? `<div class="alldays">${allDay}</div>` : '') + blocks + nowLine;
 }
 
 function tasksHtml(tasks) {
@@ -259,7 +188,7 @@ export function createHomeView() {
       const calendars = s.calendars || [];
       [[today, true], [tomorrow, false]].forEach(([day, isToday], i) => {
         setHtml(heads[i], `${isToday ? 'Today' : 'Tomorrow'} <span>${fmtDay(day).slice(0, 3)} ${day.getDate()}</span>`);
-        setHtml(cols[i].querySelector('.items'), dayHtml(events, calendars, day, now, isToday));
+        setHtml(cols[i].querySelector('.items'), dayItemsHtml(events, calendars, day, now, isToday));
       });
 
       setHtml($('.tasks'), tasksHtml(s.tasks));

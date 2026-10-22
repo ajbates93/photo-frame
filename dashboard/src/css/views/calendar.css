@@ -1,0 +1,30 @@
+/* Five-day calendar. The day-column look is shared via agenda.css. */
+.view[data-view="calendar"] { padding: 18px; }
+.cal { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 12px; }
+.cal-bar { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; }
+.cal-nav { display: flex; gap: 8px; }
+.cal-btn { min-width: 52px; height: 48px; padding: 0 18px; border-radius: 12px; background: var(--chip); color: var(--ink); font-size: 17px; font-weight: 650; }
+.cal-btn:active { opacity: .8; }
+.cal-btn:disabled { opacity: .4; }
+.cal-range { font-family: var(--display); font-size: 30px; line-height: 1; }
+.cal-legend { margin-left: auto; display: flex; gap: 18px; font-size: 14px; color: var(--muted); }
+.cal-legend span { display: inline-flex; align-items: center; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; }
+.cal-grid {
+  flex: 1 1 auto; min-height: 0; position: relative; display: grid;
+  grid-template-columns: 54px repeat(5, 1fr); grid-template-rows: 52px 1fr;
+  background: var(--card); border-radius: var(--r); border: var(--line-w) solid var(--line);
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.cal-grid .ag-h { flex-direction: row; font-size: 16px; }
+.cal-grid .ev { cursor: pointer; }
+
+.sheet { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; align-items: center; justify-content: center; }
+.sheet[hidden] { display: none; }
+.sheet-back { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, .45); }
+.sheet-card { position: relative; width: 460px; max-width: 90%; background: var(--card); color: var(--ink); border-radius: var(--r); border: var(--line-w) solid var(--line); padding: 26px 28px 22px; box-shadow: 0 10px 40px rgba(0, 0, 0, .3); }
+.sheet-card h3 { margin: 0 0 8px; font-size: 32px; line-height: 1.1; overflow-wrap: break-word; }
+.sheet-when { font-size: 18px; font-weight: 650; }
+.sheet-loc { font-size: 16px; color: var(--muted); margin-top: 6px; }
+.sheet-cal { display: flex; align-items: center; font-size: 15px; color: var(--muted); margin-top: 12px; }
+.sheet-close { margin-top: 20px; }

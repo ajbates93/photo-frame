@@ -9,6 +9,7 @@ import { themeFor, nextBoundary } from './lib/theme.js';
 import { fmtTime } from './lib/time.js';
 import { icon } from './ui/icons.js';
 import { createHomeView } from './views/home.js';
+import { createCalendarView } from './views/calendar.js';
 
 export const SECTIONS = ['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude'];
 const TITLES = {
@@ -58,6 +59,7 @@ export function boot({
   const viewMap = views || {
     ...Object.fromEntries(SECTIONS.map((n) => [n, placeholderView(n)])),
     home: createHomeView(),
+    calendar: createCalendarView(),
   };
   const overlay = doc.getElementById('overlay');
   const toasts = doc.getElementById('toasts');
