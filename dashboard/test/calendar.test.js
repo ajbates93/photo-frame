@@ -107,6 +107,26 @@ describe('layoutDay overlap columns', () => {
       .toEqual({ A: [0, 1], B: [0, 1] });
   });
 
+  it('gives two blocks clamped to the top edge their own columns', () => {
+    const bs = layoutDay([
+      ev('gym', d(2026, 10, 22, 6, 30), d(2026, 10, 22, 7, 15)),
+      ev('dog', d(2026, 10, 22, 7, 20), d(2026, 10, 22, 7, 50)),
+    ], DAY, NOW);
+    bs.forEach((b) => expect(b.topPct).toBe(0));
+    expect(bs.map((b) => b.cols)).toEqual([2, 2]);
+    expect(bs.map((b) => b.col).sort()).toEqual([0, 1]);
+  });
+
+  it('gives two blocks clamped to the bottom edge their own columns', () => {
+    const bs = layoutDay([
+      ev('a', d(2026, 10, 22, 21, 30), d(2026, 10, 22, 22, 15)),
+      ev('b', d(2026, 10, 22, 22, 30), d(2026, 10, 22, 23, 30)),
+    ], DAY, NOW);
+    bs.forEach((b) => expect(b.topPct).toBe(97));
+    expect(bs.map((b) => b.cols)).toEqual([2, 2]);
+    expect(bs.map((b) => b.col).sort()).toEqual([0, 1]);
+  });
+
   it('uses three columns for three mutually overlapping events', () => {
     expect(cols([['A', 9, 0, 11, 0], ['B', 9, 30, 11, 0], ['C', 10, 0, 11, 0]]))
       .toEqual({ A: [0, 3], B: [1, 3], C: [2, 3] });

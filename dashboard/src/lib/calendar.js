@@ -52,8 +52,14 @@ function layoutOne(event, start, end, day, now, grid) {
   };
 }
 
+// Columns are assigned on the displayed intervals (clamped top/height), so blocks
+// pinned to the same grid edge never hide each other.
+const EPS = 1e-6;
+const top = (b) => b.topPct;
+const bottom = (b) => b.topPct + b.heightPct;
+
 function assignColumns(blocks) {
-  blocks.sort((a, b) => a._start - b._start || a._end - b._end);
+  blocks.sort((a, b) => top(a) - top(b) || bottom(a) - bottom(b) || a._start - b._start);
   let cluster = [];
   let clusterEnd = -Infinity;
   const flush = () => {
@@ -62,18 +68,18 @@ function assignColumns(blocks) {
     cluster = [];
   };
   for (const b of blocks) {
-    if (cluster.length && b._start >= clusterEnd) {
+    if (cluster.length && top(b) >= clusterEnd - EPS) {
       flush();
       clusterEnd = -Infinity;
     }
     const taken = new Set(
-      cluster.filter((o) => o._end > b._start).map((o) => o.col),
+      cluster.filter((o) => bottom(o) > top(b) + EPS).map((o) => o.col),
     );
     let col = 0;
     while (taken.has(col)) col += 1;
     b.col = col;
     cluster.push(b);
-    clusterEnd = Math.max(clusterEnd, b._end);
+    clusterEnd = Math.max(clusterEnd, bottom(b));
   }
   flush();
 }
