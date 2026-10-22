@@ -241,3 +241,11 @@ describe('shell offline placeholders', () => {
     shell.stop();
   });
 });
+
+describe('stale pill', () => {
+  it('never takes taps meant for the controls underneath', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/css/base.css'), 'utf8');
+    const rule = css.match(/#stale\s*\{([^}]*)\}/)[1];
+    expect(rule).toMatch(/pointer-events:\s*none/);
+  });
+});

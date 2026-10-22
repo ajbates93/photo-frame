@@ -54,7 +54,10 @@ function heroHtml(state, now) {
     ? `${fmtCountdown(mins)}<small>TO GO</small>`
     : `${fmtTime(start)}<small>STARTS</small>`;
   const lb = leaveBy(next);
-  const meta = fmtRange(start, end) + (next.location ? ` · ${next.location}` : '');
+  // The next event can be up to 48 h away: name its day unless it is today.
+  const days = Math.round((dayStart(start) - dayStart(now)) / 86400000);
+  const day = days === 0 ? '' : `${days === 1 ? 'Tomorrow' : fmtDay(start)} · `;
+  const meta = day + fmtRange(start, end) + (next.location ? ` · ${next.location}` : '');
   return {
     cls: '',
     html: `<div class="main"><div class="lbl">Next up${cal ? ` · ${esc(cal.label)}` : ''}</div>`

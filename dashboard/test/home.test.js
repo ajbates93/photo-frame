@@ -29,6 +29,18 @@ describe('home view', () => {
     expect(s.el.querySelector('.hero .pill').textContent).toContain('Leave by 5:10pm');
   });
 
+  it('hero names the day when the next event is not today', () => {
+    const { el } = setup(new Date(2026, 9, 22, 20, 15));
+    expect(el.querySelector('.hero h3').textContent).toBe('Design review');
+    expect(el.querySelector('.hero .meta').textContent).toBe('Tomorrow · 10:00am–11:00am · Office');
+    const later = setup(new Date(2026, 9, 22, 20, 15), (st) => {
+      st.events = [{ ...st.events[1], start: new Date(2026, 9, 24, 9).toISOString(), end: new Date(2026, 9, 24, 10).toISOString() }];
+    });
+    expect(later.el.querySelector('.hero .meta').textContent).toBe('Saturday · 9:00am–10:00am');
+    const today = setup();
+    expect(today.el.querySelector('.hero .meta').textContent).toBe('9:00am–9:30am');
+  });
+
   it('hero says nothing coming up when there are no events in 48 h', () => {
     const { el } = setup(NOW, (st) => { st.events = []; });
     expect(el.querySelector('.hero').textContent).toContain('Nothing coming up');
