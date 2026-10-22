@@ -26,6 +26,16 @@ describe('mock api', () => {
     expect(n.claude.usage).toBeNull();
   });
 
+  it('?now=<ISO> regenerates fixtures relative to that time; plain requests keep mutations', () => {
+    const m = createMockApi(NOW);
+    const pinned = m.handle({ method: 'GET', url: '/api/state?now=2026-12-25T08:42:00%2B00:00' }).json;
+    expect(pinned.events[0].start.startsWith('2026-12-25')).toBe(true);
+    const plain = m.handle({ method: 'GET', url: '/api/state' }).json;
+    expect(plain.events[0].start.startsWith('2026-10-22')).toBe(true);
+    const bad = m.handle({ method: 'GET', url: '/api/state?now=nope' }).json;
+    expect(bad.events[0].start.startsWith('2026-10-22')).toBe(true);
+  });
+
   it('PATCH shopping item checks it', () => {
     const m = createMockApi(NOW);
     const r = m.handle({ method: 'PATCH', url: '/api/shopping/items/s1', body: { checked: true } });

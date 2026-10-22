@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/check-compat.mjs dist",
-    "test": "vitest run"
+    "test": "vitest run",
+    "screens": "node scripts/screenshot.mjs"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",

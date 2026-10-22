@@ -44,7 +44,9 @@ export function createMockApi(now) {
 
     if (path === '/api/state' && method === 'GET') {
       if (q.get('fail') === '1') return err(503, 'Service unavailable');
-      const s = structuredClone(state);
+      // ?now=<ISO> regenerates the fixtures relative to that instant (screenshots).
+      const pinned = q.get('now') ? new Date(q.get('now')) : null;
+      const s = pinned && !Number.isNaN(pinned.getTime()) ? makeFixtureState(pinned) : structuredClone(state);
       if (q.get('nulls') === '1') {
         s.weather = null;
         s.speaker = null;

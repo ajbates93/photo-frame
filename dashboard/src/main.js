@@ -58,9 +58,11 @@ export function boot({
   now = () => new Date(),
   views = null,
   forcedTheme = null,
+  initialView = 'home',
+  stateSearch = '',
 } = {}) {
   const html = doc.documentElement;
-  const theStore = store || createStore({ load: () => api.getState() });
+  const theStore = store || createStore({ load: () => api.getState(stateSearch) });
   const viewMap = views || {
     ...Object.fromEntries(SECTIONS.map((n) => [n, placeholderView(n)])),
     home: createHomeView(),
@@ -213,7 +215,7 @@ export function boot({
 
   const unsubscribe = theStore.subscribe(render);
   const tick = setInterval(render, TICK_MS);
-  go('home');
+  go(SECTIONS.includes(initialView) ? initialView : 'home');
   applyTheme();
   render();
   theStore.refresh();
@@ -229,7 +231,33 @@ export function boot({
     } };
 }
 
+// Dev-only page flags: ?theme, ?view, ?now (pins the clock), ?nulls and ?fail (forwarded to the mock API).
+export function devFlags(search = '') {
+  const q = new URLSearchParams(search);
+  const theme = q.get('theme');
+  const view = q.get('view');
+  const nowRaw = q.get('now');
+  const nowDate = nowRaw ? new Date(nowRaw) : null;
+  const pinned = nowDate && !Number.isNaN(nowDate.getTime()) ? nowDate : null;
+  const fwd = new URLSearchParams();
+  if (q.get('nulls') === '1') fwd.set('nulls', '1');
+  if (q.get('fail') === '1') fwd.set('fail', '1');
+  if (pinned) fwd.set('now', nowRaw);
+  const str = fwd.toString();
+  return {
+    forcedTheme: theme === 'paper' || theme === 'night' ? theme : null,
+    initialView: SECTIONS.includes(view) ? view : 'home',
+    now: pinned,
+    stateSearch: str ? `?${str}` : '',
+  };
+}
+
 if (import.meta.env.MODE !== 'test') {
-  const flag = import.meta.env.DEV ? new URLSearchParams(location.search).get('theme') : null;
-  boot({ forcedTheme: flag === 'paper' || flag === 'night' ? flag : null });
+  const opts = {};
+  if (import.meta.env.DEV) {
+    const { now: pinned, ...rest } = devFlags(location.search);
+    Object.assign(opts, rest);
+    if (pinned) opts.now = () => new Date(pinned.getTime());
+  }
+  boot(opts);
 }
