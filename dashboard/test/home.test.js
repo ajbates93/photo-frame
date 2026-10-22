@@ -34,7 +34,7 @@ describe('home view', () => {
     expect(el.querySelector('.hero h3').textContent).toBe('Design review');
     expect(el.querySelector('.hero .meta').textContent).toBe('Tomorrow · 10:00am–11:00am · Office');
     const later = setup(new Date(2026, 9, 22, 20, 15), (st) => {
-      st.events = [{ ...st.events[1], start: new Date(2026, 9, 24, 9).toISOString(), end: new Date(2026, 9, 24, 10).toISOString() }];
+      st.events = [{ ...st.events.find((e) => e.title === 'Stand-up'), start: new Date(2026, 9, 24, 9).toISOString(), end: new Date(2026, 9, 24, 10).toISOString() }];
     });
     expect(later.el.querySelector('.hero .meta').textContent).toBe('Saturday · 9:00am–10:00am');
     const today = setup();
@@ -42,7 +42,11 @@ describe('home view', () => {
   });
 
   it('weather shows hourly entries from the current hour onward', () => {
-    const { el } = setup(new Date(2026, 9, 22, 14, 30));
+    const { el } = setup(new Date(2026, 9, 22, 14, 30), (st) => {
+      st.weather.hourly = [10, 12, 14, 16, 18, 20].map((h) => ({
+        time: new Date(2026, 9, 22, h).toISOString(), temp: 10, cond: 'cloud', rainPct: 0,
+      }));
+    });
     const hours = [...el.querySelectorAll('.weather .hours > div')].map((d) => d.textContent);
     expect(hours.map((h) => h.match(/^\d+(am|pm)/)[0])).toEqual(['2pm', '4pm', '6pm', '8pm']);
   });
@@ -76,6 +80,21 @@ describe('home view', () => {
     expect(standup.classList.contains('past')).toBe(true);
     expect(standup.classList.contains('short')).toBe(true);
     expect(el.querySelectorAll('.agenda .col')[1].querySelector('.allday').textContent).toContain('Vicky away');
+  });
+
+  it('shows both pre-08:00 fixture events side by side at the top edge', () => {
+    const { el } = setup();
+    const evs = [...el.querySelectorAll('.agenda .col')[0].querySelectorAll('.ev')];
+    const early = ['Gym', 'Dog walk'].map((t) => evs.find((e) => e.textContent.includes(t)));
+    early.forEach((e) => {
+      expect(e.style.top).toMatch(/^calc\(0(\.0+)?% \+ 1px\)$/);
+      expect(e.style.width).toContain('50%');
+    });
+    expect(early[0].style.left).not.toBe(early[1].style.left);
+    // Edge blocks are only 3% tall: they stay one line (not the 2-line side-by-side wrap).
+    early.forEach((e) => expect(e.classList.contains('edge')).toBe(true));
+    const swim = evs.find((e) => e.textContent.includes('Swimming'));
+    expect(swim.classList.contains('edge')).toBe(false);
   });
 
   it('gives overlapping events side-by-side columns', () => {
@@ -115,7 +134,7 @@ describe('home view', () => {
 
   it('truncates long titles with an ellipsis', () => {
     const long = 'A'.repeat(60);
-    const { el } = setup(NOW, (st) => { st.events[1].title = long; });
+    const { el } = setup(NOW, (st) => { st.events.find((e) => e.title === 'Stand-up').title = long; });
     expect(el.querySelector('.hero h3').style.textOverflow).toBe('ellipsis');
   });
 

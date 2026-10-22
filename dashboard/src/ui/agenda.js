@@ -36,7 +36,7 @@ function blockHtml(b, cal) {
     `width:calc(100% / ${b.cols} - 14px)`,
     color ? `--ev:${color};--ev-bg:${tint(color, 0.16)}` : '--ev:var(--fam);--ev-bg:var(--fam-bg)',
   ].join(';');
-  const cls = `ev${b.past ? ' past' : ''}${oneLine ? ' short' : ''}${b.cols > 1 ? ' multi' : ''}`;
+  const cls = `ev${b.past ? ' past' : ''}${oneLine ? ' short' : ''}${b.cols > 1 ? ' multi' : ''}${b.edge ? ' edge' : ''}`;
   // Clamped blocks sit on a grid edge, so label them with their real time.
   const when = (b.clampedStart || b.clampedEnd) ? fmtRange(start, end) : fmtTime(start);
   // Side-by-side blocks are narrow: the title may wrap and the time line is dropped.

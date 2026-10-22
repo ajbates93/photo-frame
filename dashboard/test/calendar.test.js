@@ -113,6 +113,7 @@ describe('layoutDay overlap columns', () => {
       ev('dog', d(2026, 10, 22, 7, 20), d(2026, 10, 22, 7, 50)),
     ], DAY, NOW);
     bs.forEach((b) => expect(b.topPct).toBe(0));
+    bs.forEach((b) => expect(b.edge).toBe(true));
     expect(bs.map((b) => b.cols)).toEqual([2, 2]);
     expect(bs.map((b) => b.col).sort()).toEqual([0, 1]);
   });
@@ -123,6 +124,7 @@ describe('layoutDay overlap columns', () => {
       ev('b', d(2026, 10, 22, 22, 30), d(2026, 10, 22, 23, 30)),
     ], DAY, NOW);
     bs.forEach((b) => expect(b.topPct).toBe(97));
+    bs.forEach((b) => expect(b.edge).toBe(true));
     expect(bs.map((b) => b.cols)).toEqual([2, 2]);
     expect(bs.map((b) => b.col).sort()).toEqual([0, 1]);
   });

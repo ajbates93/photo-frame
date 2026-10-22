@@ -45,6 +45,7 @@ export function makeFixtureState(now) {
 
   const events = [
     ev('alex', 'Gym', today, '06:30', '07:15'),
+    ev('alex', 'Dog walk', today, '07:20', '07:50'),
     ev('alex', 'Stand-up', today, '09:00', '09:30'),
     ev('alex', 'Client call', today, '11:30', '12:30', { location: 'Google Meet' }),
     ev('alex', 'Lunch with Tom', today, '13:00', '14:00', { location: 'Café on the corner' }),
@@ -59,14 +60,19 @@ export function makeFixtureState(now) {
     allDay('family', 'Half term', addDays(today, 2), 3),
   ];
 
+  // Per the contract, hourly entries start at the current hour (here every 2 h).
+  const thisHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
   const hourly = [
-    ['10:00', 12, 'cloud', 10],
-    ['12:00', 13, 'partly', 10],
-    ['14:00', 14, 'cloud', 20],
-    ['16:00', 12, 'rain', 70],
-    ['18:00', 10, 'rain', 60],
-    ['20:00', 9, 'cloud', 20],
-  ].map(([t, temp, cond, rainPct]) => ({ time: iso(at(today, t)), temp, cond, rainPct }));
+    [12, 'cloud', 10],
+    [13, 'partly', 10],
+    [14, 'cloud', 20],
+    [12, 'rain', 70],
+    [10, 'rain', 60],
+    [9, 'cloud', 20],
+  ].map(([temp, cond, rainPct], i) => ({
+    time: iso(new Date(thisHour.getFullYear(), thisHour.getMonth(), thisHour.getDate(), thisHour.getHours() + i * 2)),
+    temp, cond, rainPct,
+  }));
 
   const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate(), 12, 0, 0, 0);
   const photo = (id, takenAt, place) => ({

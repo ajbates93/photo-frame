@@ -20,6 +20,9 @@
 .ev.multi { padding: 3px 6px 3px 7px; line-height: 1.15; }
 .ev.multi b { font-size: 12px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .ev.short.multi { display: block; min-height: 0; padding: 2px 6px 2px 7px; }
+/* A block wholly outside the grid is a 3% sliver on the edge: keep it one line, even side by side. */
+.ev.short.multi.edge { display: flex; min-height: 19px; padding: 0 6px 0 7px; }
+.ev.multi.edge b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .alldays { position: absolute; top: 6px; left: 6px; right: 8px; z-index: 2; }
 .allday { font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 5px; background: var(--fam-bg); color: var(--ink); border-left: 4px solid var(--fam); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .now { position: absolute; left: -5px; right: 0; border-top: 2px solid var(--now); z-index: 3; }

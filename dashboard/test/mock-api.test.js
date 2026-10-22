@@ -7,7 +7,7 @@ describe('mock api', () => {
   it('serves the fixture state', () => {
     const r = createMockApi(NOW).handle({ method: 'GET', url: '/api/state' });
     expect(r.status).toBe(200);
-    expect(r.json.events).toHaveLength(13);
+    expect(r.json.events).toHaveLength(14);
     expect(r.json.photos).toHaveLength(8);
     expect(r.json.photos.filter((p) => p.takenAt === null && p.place === null)).toHaveLength(2);
     expect(r.json.shopping.items).toHaveLength(7);

@@ -18,6 +18,7 @@ function layoutOne(event, start, end, day, now, grid) {
   let heightPct;
   let clampedStart = false;
   let clampedEnd = false;
+  const edge = e <= grid.startHour || s >= grid.endHour; // wholly outside: a sliver on the edge
 
   if (e <= grid.startHour) {
     topPct = 0;
@@ -47,6 +48,7 @@ function layoutOne(event, start, end, day, now, grid) {
     past: end <= now,
     clampedStart,
     clampedEnd,
+    edge,
     _start: start,
     _end: end,
   };
