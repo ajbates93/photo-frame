@@ -277,7 +277,8 @@ if (import.meta.env.MODE !== 'test') {
     const { now: pinned, ...rest } = devFlags(location.search);
     Object.assign(opts, rest);
     if (pinned) opts.now = () => new Date(pinned.getTime());
-    import('./dev/font-picker.js').then((m) => m.mountFontPicker());
+    // Screenshots pin the clock with ?now; keep the font picker out of them.
+    if (!pinned) import('./dev/font-picker.js').then((m) => m.mountFontPicker());
   }
   boot(opts);
 }
