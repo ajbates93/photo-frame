@@ -81,16 +81,30 @@ describe('calendar view', () => {
     expect(el.querySelector('.sheet').hidden).toBe(true);
   });
 
-  it('escapes event text and ignores bad calendar colours', () => {
-    const { el } = setup((s) => {
-      s.calendars[0].color = 'red;background:url(x)';
-      s.calendars[0].label = '<i>Al</i>';
-      s.events[1].title = '<img src=x>';
-      s.events[1].calendarId = s.calendars[0].id;
+  it('escapes event text everywhere and ignores bad calendar colours', () => {
+    const { el } = setup((st) => {
+      st.calendars[0].color = 'red;background:url(x)';
+      st.calendars[0].label = '<b>Al</b>';
+      const e = st.events.find((x) => x.title === 'Stand-up');
+      e.title = '<img src=x>';
+      e.location = '<u>Room</u>';
+      e.calendarId = st.calendars[0].id;
     });
+    expect(el.innerHTML).toContain('&lt;img src=x&gt;');
     expect(el.querySelector('img')).toBeNull();
-    expect(el.querySelectorAll('.cal-legend i')).toHaveLength(2); // dots only, no injected tag
-    expect(el.querySelector('.cal-legend .dot').getAttribute('style')).toBe('background:var(--fam)');
     expect(el.innerHTML).not.toContain('url(x)');
+    const block = [...el.querySelectorAll('.ev')].find((b) => b.textContent === '<img src=x>· 9:00am');
+    expect(block).toBeTruthy();
+    expect(block.getAttribute('style')).toContain('--ev:var(--fam)');
+    block.click();
+    const sheet = el.querySelector('.sheet');
+    expect(sheet.hidden).toBe(false);
+    expect(sheet.textContent).toContain('<img src=x>');
+    expect(sheet.textContent).toContain('<u>Room</u>');
+    expect(sheet.textContent).toContain('<b>Al</b>');
+    expect(sheet.querySelector('img, u, b')).toBeNull();
+    expect(sheet.querySelector('.dot').getAttribute('style')).toBe('background:var(--fam)');
+    expect(el.querySelectorAll('.cal-legend i')).toHaveLength(2);
+    expect(el.querySelector('.cal-legend').textContent).toContain('<b>Al</b>');
   });
 });
