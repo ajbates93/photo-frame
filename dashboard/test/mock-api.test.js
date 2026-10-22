@@ -53,12 +53,40 @@ describe('mock api', () => {
   });
 });
 
+describe('mock api validation', () => {
+  const m = () => createMockApi(NOW);
+  const cases = [
+    ['PATCH', '/api/shopping/items/s1', {}],
+    ['PATCH', '/api/shopping/items/s1', { checked: 'yes' }],
+    ['PATCH', '/api/tasks/t1', {}],
+    ['POST', '/api/plugs/pl1', {}],
+    ['POST', '/api/tasks', { title: 'x', assignee: 'bob', due: null }],
+    ['POST', '/api/tasks', { title: 'x', assignee: 'any', due: 5 }],
+    ['POST', '/api/tasks', { title: 'x', assignee: 'any', due: 'not a date' }],
+  ];
+  it.each(cases)('%s %s %j returns 400 with error', (method, url, body) => {
+    const r = m().handle({ method, url, body });
+    expect(r.status).toBe(400);
+    expect(typeof r.json.error).toBe('string');
+  });
+
+  it('malformed JSON and bad URL encoding return 400 without throwing', () => {
+    expect(m().handle({ method: 'POST', url: '/api/tasks', badJson: true }).status).toBe(400);
+    expect(m().handle({ method: 'GET', url: '/api/photos/%E0%A4%A' }).status).toBe(400);
+  });
+});
+
 describe('api client', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('act rejects with the server error message on non-2xx', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 404, json: async () => ({ error: 'Task not found' }) })));
     await expect(api.act('PATCH', '/api/tasks/x', { done: true })).rejects.toThrow('Task not found');
+  });
+
+  it('act rejects on a 2xx with a missing or unparseable body', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => { throw new Error('bad'); } })));
+    await expect(api.act('POST', '/api/screen/wake')).rejects.toThrow('Invalid response');
   });
 
   it('act sends JSON and resolves with the state', async () => {

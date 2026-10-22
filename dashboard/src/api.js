@@ -10,6 +10,9 @@ async function request(method, path, body) {
   if (!res.ok) {
     throw new Error((data && data.error) || `Request failed (${res.status})`);
   }
+  if (data === null || typeof data !== 'object') {
+    throw new Error('Invalid response from server');
+  }
   return data;
 }
 

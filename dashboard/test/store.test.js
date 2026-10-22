@@ -52,4 +52,22 @@ describe('store', () => {
     expect(load).toHaveBeenCalledTimes(2);
     vi.useRealTimers();
   });
+
+  it('ignores a non-object load result and keeps the last good state', async () => {
+    let n = 0;
+    const store = createStore({ load: async () => (++n === 1 ? { generatedAt: 'ok' } : null) });
+    await store.refresh();
+    await store.refresh();
+    expect(store.get()).toMatchObject({ state: { generatedAt: 'ok' }, stale: true });
+  });
+
+  it('discards an older in-flight load that resolves after set()', async () => {
+    let resolve;
+    const store = createStore({ load: () => new Promise((r) => { resolve = r; }) });
+    const p = store.refresh();
+    store.set({ generatedAt: 'newer' });
+    resolve({ generatedAt: 'older' });
+    await p;
+    expect(store.get().state).toEqual({ generatedAt: 'newer' });
+  });
 });

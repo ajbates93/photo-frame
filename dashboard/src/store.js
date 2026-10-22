@@ -3,16 +3,22 @@ export function createStore({ load, intervalMs = 15000 }) {
   let stale = false;
   let error = null;
   let timer = null;
+  let seq = 0;
   const subs = new Set();
   const snapshot = () => ({ state, stale, error });
   const notify = () => subs.forEach((fn) => fn(snapshot()));
 
   async function refresh() {
+    const mine = seq;
     try {
-      state = await load();
+      const next = await load();
+      if (seq !== mine) return;
+      if (next === null || typeof next !== 'object') throw new Error('Invalid state');
+      state = next;
       stale = false;
       error = null;
     } catch (e) {
+      if (seq !== mine) return;
       stale = true;
       error = (e && e.message) || String(e);
     }
@@ -41,6 +47,7 @@ export function createStore({ load, intervalMs = 15000 }) {
     },
     refresh,
     set(next) {
+      seq += 1;
       state = next;
       stale = false;
       error = null;

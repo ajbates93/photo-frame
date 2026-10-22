@@ -24,11 +24,18 @@ export function createMockApi(now) {
     return { status: 200, json: structuredClone(state) };
   };
 
-  function handle({ method, url, body }) {
-    const u = new URL(url, 'http://localhost');
+  function handle({ method, url, body, badJson }) {
+    if (badJson) return err(400, 'Malformed JSON');
+    let u;
+    try {
+      u = new URL(url, 'http://localhost');
+      decodeURIComponent(u.pathname);
+    } catch {
+      return err(400, 'Bad request URL');
+    }
     const path = u.pathname;
     const q = u.searchParams;
-    body = body || {};
+    if (body === null || typeof body !== 'object') body = {};
 
     let m = path.match(/^\/api\/photos\/([^/]+)$/);
     if (m && method === 'GET') {
@@ -47,23 +54,29 @@ export function createMockApi(now) {
     }
 
     if (path === '/api/shopping/items' && method === 'POST') {
-      if (!body.text) return err(400, 'text required');
+      if (typeof body.text !== 'string' || !body.text) return err(400, 'text required');
       state.shopping.items.push({ id: `s${nextId++}`, text: body.text, checked: false });
       return ok();
     }
     if ((m = path.match(/^\/api\/shopping\/items\/([^/]+)$/)) && method === 'PATCH') {
       const item = state.shopping.items.find((i) => i.id === m[1]);
       if (!item) return err(404, 'Item not found');
-      item.checked = !!body.checked;
+      if (typeof body.checked !== 'boolean') return err(400, 'checked must be a boolean');
+      item.checked = body.checked;
       return ok();
     }
     if (path === '/api/tasks' && method === 'POST') {
-      if (!body.title) return err(400, 'title required');
+      if (typeof body.title !== 'string' || !body.title) return err(400, 'title required');
+      if (!['alex', 'vicky', 'any'].includes(body.assignee)) return err(400, 'assignee must be alex, vicky or any');
+      const due = body.due === undefined ? null : body.due;
+      if (due !== null && (typeof due !== 'string' || Number.isNaN(Date.parse(due)))) {
+        return err(400, 'due must be an ISO string or null');
+      }
       state.tasks.push({
         id: `t${nextId++}`,
         title: body.title,
-        assignee: body.assignee || 'any',
-        due: body.due || null,
+        assignee: body.assignee,
+        due,
         done: false,
       });
       return ok();
@@ -72,13 +85,15 @@ export function createMockApi(now) {
       const idx = state.tasks.findIndex((t) => t.id === m[1]);
       if (idx < 0) return err(404, 'Task not found');
       if (method === 'DELETE') state.tasks.splice(idx, 1);
-      else state.tasks[idx].done = !!body.done;
+      else if (typeof body.done !== 'boolean') return err(400, 'done must be a boolean');
+      else state.tasks[idx].done = body.done;
       return ok();
     }
     if ((m = path.match(/^\/api\/plugs\/([^/]+)$/)) && method === 'POST') {
       const plug = state.plugs.find((p) => p.id === m[1]);
       if (!plug) return err(404, 'Plug not found');
-      plug.on = !!body.on;
+      if (typeof body.on !== 'boolean') return err(400, 'on must be a boolean');
+      plug.on = body.on;
       return ok();
     }
     if (path === '/api/speaker' && method === 'POST') {
@@ -112,11 +127,17 @@ export function mockApi() {
         req.on('data', (c) => chunks.push(c));
         req.on('end', () => {
           let body;
+          let badJson = false;
           const raw = Buffer.concat(chunks).toString('utf8');
           if (raw) {
-            try { body = JSON.parse(raw); } catch { body = undefined; }
+            try { body = JSON.parse(raw); } catch { badJson = true; }
           }
-          const out = api.handle({ method: req.method, url: req.url, body });
+          let out;
+          try {
+            out = api.handle({ method: req.method, url: req.url, body, badJson });
+          } catch (e) {
+            out = { status: 500, json: { error: (e && e.message) || 'Internal error' } };
+          }
           const headers = out.headers || { 'content-type': 'application/json' };
           res.statusCode = out.status;
           for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
