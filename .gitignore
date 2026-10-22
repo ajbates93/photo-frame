@@ -1,0 +1,28 @@
+# Brainstorming companion scratch files
+.superpowers/
+
+# Frame dumps, diagnostics and per-frame records (private: Wi-Fi passwords, serials, firmware)
+backups/
+diagnostics/
+frames/
+log/
+
+# Private notes (router/network details, personal info) - never commit
+private/
+
+# Secrets and local config
+.env
+.env.*
+secrets/
+*.secret.*
+
+# Build output and dependencies
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+
+# macOS
+.DS_Store
