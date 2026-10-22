@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  fmtTime, fmtHour, fmtRange, fmtDay, fmtDate, fmtCountdown,
+  fmtTime, fmtHour, fmtRange, fmtDay, fmtDate, fmtCountdown, fmtResetsIn,
   dayStart, addDays, hoursSinceDayStart,
 } from '../src/lib/time.js';
 
@@ -49,5 +49,15 @@ describe('day maths', () => {
     expect(addDays(day, 1).getDate()).toBe(26);
     expect(addDays(day, 1).getHours()).toBe(0);
     expect(addDays(day, -1).getDate()).toBe(24);
+  });
+});
+
+describe('fmtResetsIn', () => {
+  it('formats minutes, hours and days', () => {
+    expect(fmtResetsIn(38)).toBe('38m');
+    expect(fmtResetsIn(78)).toBe('1h 18m');
+    expect(fmtResetsIn(120)).toBe('2h 0m');
+    expect(fmtResetsIn(3 * 1440 + 125)).toBe('3d 2h');
+    expect(fmtResetsIn(-5)).toBe('0m');
   });
 });

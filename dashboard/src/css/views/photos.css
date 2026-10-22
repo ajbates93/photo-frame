@@ -1,0 +1,14 @@
+/* Photos: full-bleed slideshow; the rail slides away after 5 s. */
+.view[data-view="photos"] { padding: 0; background: #000; }
+.photos { position: relative; width: 100%; height: 100%; }
+.photos .ss-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
+.photos .ss-img.is-in { opacity: 1; }
+.photos .ss-img.is-broken { visibility: hidden; }
+.ph-shade { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent 70%, rgba(0, 0, 0, .55)); }
+.ph-cap { position: absolute; left: 32px; bottom: 84px; right: 32px; z-index: 2; color: #fff; display: flex; align-items: baseline; }
+.ph-cap b { font-size: 15px; letter-spacing: .1em; }
+.ph-cap span { font-family: var(--display); font-size: 30px; font-style: italic; margin-left: 14px; }
+
+.rail { transition: transform .3s ease; }
+.rail-hidden .rail { position: absolute; top: 0; left: 0; z-index: 20; transform: translateX(-100%); }
+.rail-hidden .views { width: 1280px; }

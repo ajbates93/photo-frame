@@ -12,6 +12,9 @@ import { createHomeView } from './views/home.js';
 import { createCalendarView } from './views/calendar.js';
 import { createTasksView } from './views/tasks.js';
 import { createShoppingView } from './views/shopping.js';
+import { createPhotosView } from './views/photos.js';
+import { createControlView } from './views/control.js';
+import { createClaudeView } from './views/claude.js';
 
 export const SECTIONS = ['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude'];
 const TITLES = {
@@ -64,6 +67,9 @@ export function boot({
     calendar: createCalendarView(),
     tasks: createTasksView(),
     shopping: createShoppingView(),
+    photos: createPhotosView(),
+    control: createControlView(),
+    claude: createClaudeView(),
   };
   const overlay = doc.getElementById('overlay');
   const toasts = doc.getElementById('toasts');

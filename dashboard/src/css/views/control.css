@@ -1,0 +1,39 @@
+/* Control: plugs grouped by room, plus the speaker card. */
+.view[data-view="control"] { padding: 28px 32px 72px; }
+.control { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 16px; }
+.control h2 { font-size: 44px; line-height: 1; flex: 0 0 auto; }
+.ctl-body { flex: 1 1 auto; min-height: 0; display: flex; gap: 20px; }
+.ctl-rooms { flex: 1 1 auto; min-width: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.ctl-room { margin-bottom: 20px; }
+.ctl-room-name { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.ctl-plugs { display: flex; flex-wrap: wrap; gap: 12px; }
+.cplug {
+  width: 190px; height: 120px; padding: 16px; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+  text-align: left; border-radius: var(--r); background: var(--card); border: var(--line-w) solid var(--line); box-shadow: var(--shadow); color: var(--muted);
+}
+.cplug:active { opacity: .85; }
+.cplug.on { background: var(--on); color: #2b2412; }
+.cplug.is-off { opacity: .45; }
+.cplug-name { font-size: 18px; font-weight: 650; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cplug.on .cplug-name { color: #2b2412; }
+.cplug-state { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ctl-empty { color: var(--muted); font-size: 18px; margin-top: 12px; }
+.ctl-speaker { flex: 0 0 340px; align-self: flex-start; padding: 22px; border-radius: var(--r); background: var(--card); border: var(--line-w) solid var(--line); box-shadow: var(--shadow); }
+.ctl-speaker .lbl { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.sp-title { font-family: var(--display); font-size: 32px; line-height: 1.1; overflow-wrap: break-word; }
+.sp-idle { color: var(--muted); }
+.sp-artist { margin-top: 4px; font-size: 17px; color: var(--muted); }
+.sp-play { margin: 20px 0; width: 76px; height: 76px; border-radius: 50%; background: var(--ink); color: var(--bg); display: flex; align-items: center; justify-content: center; }
+.sp-vol { display: flex; align-items: center; gap: 12px; }
+.sp-step { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; background: var(--chip); display: flex; align-items: center; justify-content: center; }
+.sp-step:active { opacity: .8; }
+.sp-play:disabled, .sp-step:disabled { opacity: .35; }
+.sp-level { flex: 1 1 auto; text-align: center; font-weight: 700; font-size: 15px; }
+.sp-bar { height: 8px; border-radius: 6px; background: var(--grid); margin-bottom: 6px; overflow: hidden; }
+.sp-bar i { display: block; height: 100%; background: var(--accent); }
+
+.control .sheet-card { width: 480px; }
+.ctl-btn { min-width: 52px; height: 52px; padding: 0 24px; border-radius: 14px; background: var(--chip); color: var(--ink); font-size: 18px; font-weight: 700; }
+.ctl-btn:active { opacity: .8; }
+.ctl-danger { background: var(--now); color: #fff; }
+.ctl-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }

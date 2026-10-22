@@ -55,3 +55,14 @@ export function hoursSinceDayStart(d, day) {
   );
   return dayDiff * 24 + d.getHours() + d.getMinutes() / 60;
 }
+
+// "resets in" form: 38m, 1h 18m, 3d 2h.
+export function fmtResetsIn(mins) {
+  const total = Math.max(0, Math.round(mins));
+  const d = Math.floor(total / 1440);
+  const h = Math.floor((total % 1440) / 60);
+  const m = total % 60;
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
