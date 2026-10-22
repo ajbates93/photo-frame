@@ -17,22 +17,37 @@ function onThisDay(p, now) {
     && d.getFullYear() < now.getFullYear();
 }
 
+// The two <img> elements exist only while the slideshow runs (start() to stop()),
+// so a hidden view holds none: at most two are in the document at any time.
 export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
-  const imgs = [0, 1].map(() => {
-    const im = document.createElement('img');
-    im.alt = '';
-    im.className = 'ss-img';
-    im.addEventListener('error', () => im.classList.add('is-broken'));
-    el.insertBefore(im, el.firstChild); // under any caption shade the caller adds
-    return im;
-  });
+  let imgs = null;
   let front = 0;
   let photos = [];
   let queue = [];
   let timer = null;
+  let running = false;
+  let paused = false;
   let shown = false;
   let token = 0;
   let loadTimer = null;
+
+  function addImages() {
+    imgs = [0, 1].map(() => {
+      const im = document.createElement('img');
+      im.alt = '';
+      im.className = 'ss-img';
+      im.addEventListener('error', () => im.classList.add('is-broken'));
+      el.insertBefore(im, el.firstChild); // under any caption shade the caller adds
+      return im;
+    });
+    front = 0;
+  }
+
+  function removeImages() {
+    if (!imgs) return;
+    imgs.forEach((im) => { im.removeAttribute('src'); im.remove(); });
+    imgs = null;
+  }
 
   function take() {
     if (!queue.length) {
@@ -45,13 +60,14 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
   }
 
   function next() {
+    if (!imgs) return;
     const photo = take();
     if (!photo) return;
     const mine = ++token;
     const back = imgs[1 - front];
     let done = false;
     const show = () => {
-      if (done || mine !== token) return;
+      if (done || mine !== token || !imgs) return;
       done = true;
       back.classList.remove('is-broken');
       back.classList.add('is-in');
@@ -67,9 +83,17 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
     back.src = photo.url;
   }
 
-  function restart() {
+  function halt() {
     clearInterval(timer);
+    clearTimeout(loadTimer);
+    timer = null;
+    loadTimer = null;
+  }
+
+  function resume() {
+    if (!running || paused || timer) return;
     timer = setInterval(next, intervalMs);
+    if (photos.length && !shown) next();
   }
 
   return {
@@ -79,22 +103,31 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
       if (!photos.length) {
         token += 1;
         shown = false;
-        imgs.forEach((im) => { im.classList.remove('is-in'); im.removeAttribute('src'); });
+        if (imgs) imgs.forEach((im) => { im.classList.remove('is-in'); im.removeAttribute('src'); });
         if (onChange) onChange(null);
         return;
       }
       if (timer && !shown) next();
     },
     start() {
-      if (timer) return;
-      restart();
-      if (photos.length && !shown) next();
+      if (running) return;
+      running = true;
+      addImages();
+      resume();
     },
     stop() {
-      clearInterval(timer);
-      clearTimeout(loadTimer);
-      loadTimer = null;
-      timer = null;
+      running = false;
+      halt();
+      token += 1;
+      shown = false;
+      removeImages();
+      if (onChange) onChange(null);
+    },
+    // Paused (screen off): no timers run, the current photo stays; resumes where it left off.
+    pause(on) {
+      paused = !!on;
+      if (paused) halt();
+      else resume();
     },
   };
 }

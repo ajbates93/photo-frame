@@ -160,7 +160,8 @@ describe('home view', () => {
 
   it('only keeps two slideshow images and rebuilds nothing on repeat updates', () => {
     const { el, view, ctx, state } = setup();
-    expect(el.querySelectorAll('.photo img').length).toBeLessThanOrEqual(2);
+    view.show(ctx);
+    expect(el.querySelectorAll('.photo img')).toHaveLength(2);
     const first = el.querySelector('.photo img');
     view.update(state, ctx);
     view.update(state, ctx);
@@ -169,9 +170,11 @@ describe('home view', () => {
   });
 
   it('puts the slideshow images under the caption shade', () => {
-    const { el } = setup();
+    const { el, view, ctx } = setup();
+    view.show(ctx);
     const photo = el.querySelector('.photo');
     const kids = [...photo.children];
+    expect(kids.filter((k) => k.tagName === 'IMG')).toHaveLength(2);
     const shade = kids.indexOf(photo.querySelector('.shade'));
     kids.filter((k) => k.tagName === 'IMG').forEach((im) => expect(kids.indexOf(im)).toBeLessThan(shade));
   });

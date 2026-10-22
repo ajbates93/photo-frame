@@ -212,6 +212,7 @@ export function createHomeView() {
       setHtml($('.shopping'), shoppingHtml(s.shopping));
       setHtml($('.claude'), claudeHtml(s.claude, now));
 
+      slideshow.pause(!!(s.screen && s.screen.mode === 'off'));
       const photos = s.photos || [];
       const key = photos.map((p) => p.id).join(',');
       if (key !== photoKey) {

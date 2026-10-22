@@ -70,6 +70,7 @@ export function createPhotosView() {
 
     update(s, c) {
       ctx = c;
+      slideshow.pause(!!(s.screen && s.screen.mode === 'off'));
       const photos = s.photos || [];
       const key = photos.map((p) => p.id).join(',');
       if (key !== photoKey) {

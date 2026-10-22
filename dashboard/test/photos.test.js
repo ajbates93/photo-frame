@@ -41,4 +41,13 @@ describe('photos view', () => {
     expect(el.querySelectorAll('img')).toHaveLength(2);
     view.hide();
   });
+
+  it('stops its timers and drops its images on hide', () => {
+    const { el, view } = setup();
+    view.show();
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    view.hide();
+    expect(vi.getTimerCount()).toBe(0);
+    expect(el.querySelectorAll('img')).toHaveLength(0);
+  });
 });
