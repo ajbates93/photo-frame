@@ -1,0 +1,47 @@
+/* Tasks: one column per person plus Anyone. Each column scrolls on its own. */
+.view[data-view="tasks"] { padding: 28px 32px 72px; }
+.tasks { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; gap: 16px; }
+.tasks-head { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.tasks-head h2 { font-size: 44px; line-height: 1; }
+.task-btn { min-width: 52px; height: 52px; padding: 0 24px; border-radius: 14px; background: var(--chip); color: var(--ink); font-size: 18px; font-weight: 700; }
+.task-btn:active { opacity: .8; }
+.task-btn:disabled { opacity: .4; }
+.task-new, .task-go { background: var(--ink); color: var(--bg); }
+.task-danger { background: var(--now); color: #fff; }
+.tasks-cols { flex: 1 1 auto; min-height: 0; display: flex; gap: 16px; }
+.tcol {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column;
+  background: var(--card); border-radius: var(--r); border: var(--line-w) solid var(--line); box-shadow: var(--shadow); overflow: hidden;
+}
+.tcol-head { flex: 0 0 auto; display: flex; align-items: center; padding: 16px 20px 10px; }
+.tcol-name { font-family: var(--display); font-size: 30px; line-height: 1; }
+.tcol-count { margin-left: auto; min-width: 28px; padding: 3px 9px; border-radius: 14px; background: var(--chip); text-align: center; font-size: 14px; font-weight: 700; color: var(--muted); }
+.tcol-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 10px 10px; }
+.tcol-empty { padding: 16px 10px; color: var(--muted); font-size: 16px; }
+.task { display: flex; align-items: flex-start; width: 100%; min-height: 64px; padding: 10px; margin-bottom: 4px; border-radius: 12px; text-align: left; }
+.task:active { background: var(--chip); }
+.task-box { flex: 0 0 auto; width: 26px; height: 26px; margin: 2px 14px 0 0; border-radius: 50%; border: 2px solid var(--grid-strong); }
+.task-body { display: flex; flex-direction: column; min-width: 0; }
+.task-title { font-size: 19px; font-weight: 600; overflow-wrap: break-word; }
+.task-due { margin-top: 3px; font-size: 14px; font-weight: 650; color: var(--muted); }
+.task.is-overdue { background: rgba(214, 69, 58, .13); }
+.task.is-overdue .task-due { color: var(--now); }
+.task.is-done { opacity: .5; }
+.task.is-done .task-title { text-decoration: line-through; }
+.task.is-done .task-box { background: var(--accent); border-color: var(--accent); }
+
+.tasks .sheet-card { width: 560px; }
+.tasks .sheet-card h3 { margin-bottom: 14px; }
+.task-input {
+  width: 100%; height: 56px; padding: 0 16px; border-radius: 14px; font: inherit; font-size: 20px; color: var(--ink);
+  background: var(--bg); border: 2px solid var(--grid-strong); -webkit-user-select: text; user-select: text;
+}
+.task-pick { margin-top: 10px; }
+.task-pick[hidden] { display: none; }
+.task-label { margin: 16px 0 6px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.task-opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.task-label + .task-opts { margin-top: 0; }
+.task-opt { height: 48px; padding: 0 18px; border-radius: 24px; background: var(--chip); font-size: 16px; font-weight: 600; }
+.task-opt.is-on { background: var(--ink); color: var(--bg); }
+.task-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+.tsheet-add[hidden], .tsheet-del[hidden] { display: none; }

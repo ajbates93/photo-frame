@@ -10,6 +10,8 @@ import { fmtTime } from './lib/time.js';
 import { icon } from './ui/icons.js';
 import { createHomeView } from './views/home.js';
 import { createCalendarView } from './views/calendar.js';
+import { createTasksView } from './views/tasks.js';
+import { createShoppingView } from './views/shopping.js';
 
 export const SECTIONS = ['home', 'calendar', 'tasks', 'shopping', 'photos', 'control', 'claude'];
 const TITLES = {
@@ -60,6 +62,8 @@ export function boot({
     ...Object.fromEntries(SECTIONS.map((n) => [n, placeholderView(n)])),
     home: createHomeView(),
     calendar: createCalendarView(),
+    tasks: createTasksView(),
+    shopping: createShoppingView(),
   };
   const overlay = doc.getElementById('overlay');
   const toasts = doc.getElementById('toasts');
