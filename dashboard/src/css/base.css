@@ -67,6 +67,17 @@ h1, h2, h3 { font-family: var(--display); font-weight: var(--h-w); margin: 0; }
   transition: background-color 3s ease, color 3s ease, border-color 3s ease;
 }
 
+/* ---- sheets (modal cards inside a view) and the shared confirm sheet ---- */
+.sheet { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; display: flex; align-items: center; justify-content: center; }
+.sheet[hidden] { display: none; }
+.sheet-back { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, .45); }
+.sheet-card { position: relative; width: 460px; max-width: 90%; background: var(--card); color: var(--ink); border-radius: var(--r); border: var(--line-w) solid var(--line); padding: 26px 28px 22px; box-shadow: 0 10px 40px rgba(0, 0, 0, .3); }
+.sheet-card h3 { margin: 0 0 8px; font-size: 32px; line-height: 1.1; overflow-wrap: break-word; }
+.confirm-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+.confirm-btn { min-width: 52px; height: 52px; padding: 0 24px; border-radius: 14px; background: var(--chip); color: var(--ink); font-size: 18px; font-weight: 700; }
+.confirm-btn:active { opacity: .8; }
+.confirm-danger { background: var(--now); color: #fff; }
+
 /* ---- stale pill ---- */
 #stale {
   position: fixed;

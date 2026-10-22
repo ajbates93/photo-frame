@@ -43,8 +43,8 @@ describe('control view', () => {
     el.querySelector('[data-plug="pl1"]').click();
     expect(ctx.act).not.toHaveBeenCalled();
     expect(el.querySelector('.sheet').hidden).toBe(false);
-    expect(el.querySelector('.ctl-confirm-title').textContent).toBe('Turn off <b>Lamp</b>?');
-    expect(el.querySelector('.ctl-confirm-title b')).toBeNull();
+    expect(el.querySelector('.confirm-title').textContent).toBe('Turn off <b>Lamp</b>?');
+    expect(el.querySelector('.confirm-title b')).toBeNull();
     el.querySelector('[data-confirm]').click();
     expect(ctx.act).toHaveBeenCalledWith('POST', '/api/plugs/pl1', { on: false });
     expect(el.querySelector('.sheet').hidden).toBe(true);

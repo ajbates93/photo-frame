@@ -33,7 +33,3 @@
 .sp-bar i { display: block; height: 100%; background: var(--accent); }
 
 .control .sheet-card { width: 480px; }
-.ctl-btn { min-width: 52px; height: 52px; padding: 0 24px; border-radius: 14px; background: var(--chip); color: var(--ink); font-size: 18px; font-weight: 700; }
-.ctl-btn:active { opacity: .8; }
-.ctl-danger { background: var(--now); color: #fff; }
-.ctl-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }

@@ -6,6 +6,7 @@ import {
 import { photoCaption } from '../lib/captions.js';
 import { usableUsage } from '../lib/usage.js';
 import { createSlideshow } from '../ui/slideshow.js';
+import { createPlugToggle } from '../ui/plug-toggle.js';
 import { icon } from '../ui/icons.js';
 import { esc, setHtml } from '../ui/html.js';
 import { showUnavailable, OFFLINE_MESSAGE } from '../ui/unavailable.js';
@@ -121,6 +122,7 @@ export function createHomeView() {
   let slideshow = null;
   let photoKey = null;
   let current = null;
+  let plugs = null;
 
   const $ = (sel) => q.querySelector(sel);
 
@@ -136,8 +138,7 @@ export function createHomeView() {
     if (plug) {
       e.stopPropagation();
       if (plug.disabled || !state) return;
-      const p = (state.plugs || []).find((x) => x.id === plug.dataset.plug);
-      if (p) ctx.act('POST', `/api/plugs/${p.id}`, { on: !p.on });
+      plugs.toggle((state.plugs || []).find((x) => x.id === plug.dataset.plug));
       return;
     }
     if (e.target.closest('.plugs')) return;
@@ -151,6 +152,7 @@ export function createHomeView() {
       el.innerHTML = SKELETON;
       q = el;
       el.addEventListener('click', onClick);
+      plugs = createPlugToggle(el, () => ctx);
       slideshow = createSlideshow($('.photo'), {
         onChange: (p) => { current = p; renderCaption(); },
       });
@@ -163,6 +165,7 @@ export function createHomeView() {
 
     hide() {
       slideshow.stop();
+      plugs.close();
     },
 
     // First load failed and there is no state: keep the clock, show a short placeholder per tile.

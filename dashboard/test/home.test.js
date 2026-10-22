@@ -112,6 +112,40 @@ describe('home view', () => {
     expect(ctx.go).toHaveBeenCalledWith('claude');
   });
 
+  it('asks before turning a confirm plug off from the home strip, like Control', () => {
+    const { el, ctx } = setup(NOW, (st) => { st.plugs[0].confirm = true; st.plugs[0].name = '<b>Lamp</b>'; });
+    el.querySelector('.plug[data-plug="pl1"]').click();
+    expect(ctx.act).not.toHaveBeenCalled();
+    const sheet = el.querySelector('.sheet');
+    expect(sheet.hidden).toBe(false);
+    expect(sheet.querySelector('.confirm-title').textContent).toBe('Turn off <b>Lamp</b>?');
+    sheet.querySelector('.sheet-close').click();
+    expect(sheet.hidden).toBe(true);
+    expect(ctx.act).not.toHaveBeenCalled();
+    expect(ctx.go).not.toHaveBeenCalled();
+    el.querySelector('.plug[data-plug="pl1"]').click();
+    sheet.querySelector('[data-confirm]').click();
+    expect(ctx.act).toHaveBeenCalledWith('POST', '/api/plugs/pl1', { on: false });
+    expect(sheet.hidden).toBe(true);
+    expect(ctx.go).not.toHaveBeenCalled();
+  });
+
+  it('turns a confirm plug on without asking, and closes the sheet on hide', () => {
+    const { el, ctx, view } = setup(NOW, (st) => { st.plugs.forEach((p) => { p.confirm = true; }); });
+    el.querySelector('.plug[data-plug="pl2"]').click();
+    expect(ctx.act).toHaveBeenCalledWith('POST', '/api/plugs/pl2', { on: true });
+    el.querySelector('.plug[data-plug="pl1"]').click();
+    expect(el.querySelector('.sheet').hidden).toBe(false);
+    view.hide();
+    expect(el.querySelector('.sheet').hidden).toBe(true);
+  });
+
+  it('encodes the plug id in the API path', () => {
+    const { el, ctx } = setup(NOW, (st) => { st.plugs[0].id = 'a/b c'; });
+    el.querySelector('.plug').click();
+    expect(ctx.act).toHaveBeenCalledWith('POST', '/api/plugs/a%2Fb%20c', { on: false });
+  });
+
   it('skips hidden plugs and keeps unreachable ones inert', () => {
     const { el, ctx } = setup(NOW, (st) => {
       st.plugs[0].hidden = true; st.plugs[1].reachable = false;

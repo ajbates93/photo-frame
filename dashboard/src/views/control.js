@@ -1,6 +1,7 @@
 import '../css/views/control.css';
 import { icon } from '../ui/icons.js';
 import { esc, setHtml } from '../ui/html.js';
+import { createPlugToggle } from '../ui/plug-toggle.js';
 
 const VOL_STEP = 10;
 const clampVol = (v) => Math.max(0, Math.min(100, v));
@@ -11,16 +12,6 @@ const SKELETON = `
   <div class="ctl-body">
     <div class="ctl-rooms"></div>
     <div class="ctl-speaker"></div>
-  </div>
-  <div class="sheet" hidden>
-    <div class="sheet-back"></div>
-    <div class="sheet-card" role="dialog" aria-modal="true">
-      <h3 class="ctl-confirm-title"></h3>
-      <div class="ctl-actions">
-        <button type="button" class="ctl-btn sheet-close">Cancel</button>
-        <button type="button" class="ctl-btn ctl-danger" data-confirm>Turn off</button>
-      </div>
-    </div>
   </div>
 </div>`;
 
@@ -59,7 +50,7 @@ export function createControlView() {
   let q = null;
   let ctx = null;
   let state = null;
-  let pendingId = null;
+  let plugs = null;
 
   const $ = (sel) => q.querySelector(sel);
 
@@ -69,31 +60,11 @@ export function createControlView() {
     setHtml($('.ctl-speaker'), speakerHtml(state.speaker));
   }
 
-  function closeSheet() {
-    $('.sheet').hidden = true;
-    pendingId = null;
-  }
-
   function onClick(e) {
     const t = e.target;
-    if (t.closest('.sheet-close') || t.closest('.sheet-back')) { closeSheet(); return; }
-    if (t.closest('[data-confirm]')) {
-      const id = pendingId;
-      closeSheet();
-      if (id) ctx.act('POST', `/api/plugs/${encodeURIComponent(id)}`, { on: false });
-      return;
-    }
     const plug = t.closest('[data-plug]');
     if (plug) {
-      const p = ((state && state.plugs) || []).find((x) => x.id === plug.dataset.plug);
-      if (!p || !p.reachable) return;
-      if (p.on && p.confirm) {
-        pendingId = p.id;
-        setHtml($('.ctl-confirm-title'), `Turn off ${esc(p.name)}?`);
-        $('.sheet').hidden = false;
-        return;
-      }
-      ctx.act('POST', `/api/plugs/${encodeURIComponent(p.id)}`, { on: !p.on });
+      plugs.toggle(((state && state.plugs) || []).find((x) => x.id === plug.dataset.plug));
       return;
     }
     const sp = state && state.speaker;
@@ -113,13 +84,14 @@ export function createControlView() {
       q = el;
       el.innerHTML = SKELETON;
       el.addEventListener('click', onClick);
+      plugs = createPlugToggle($('.control'), () => ctx);
     },
     show(c) {
       if (c) ctx = c;
-      closeSheet();
+      plugs.close();
       render();
     },
-    hide() { closeSheet(); },
+    hide() { plugs.close(); },
     update(s, c) {
       ctx = c;
       state = s;
