@@ -4,6 +4,8 @@ import { esc, setHtml, validColor } from '../ui/html.js';
 import { gutterHtml, hourLinesHtml, dayItemsHtml } from '../ui/agenda.js';
 
 const DAYS = 5;
+// /api/state carries events from the start of today to today + 14 days.
+const WINDOW_DAYS = 14;
 
 const shortDate = (d) => `${d.getDate()} ${fmtDate(d).split(' ')[1].slice(0, 3)}`;
 
@@ -87,6 +89,8 @@ export function createCalendarView() {
     }
     setHtml($('.cal-range'), `${shortDate(first)} – ${shortDate(last)}`);
     q.querySelector('.cal-today').disabled = offset === 0;
+    q.querySelector('[data-page="prev"]').disabled = offset === 0;
+    q.querySelector('[data-page="next"]').disabled = offset + DAYS > WINDOW_DAYS;
     setHtml($('.cal-legend'), calendars.map((c) => `<span>${dot(c.color)}${esc(c.label)}</span>`).join(''));
   }
 
@@ -96,7 +100,9 @@ export function createCalendarView() {
     const page = t.closest('[data-page]');
     if (page) {
       const k = page.dataset.page;
-      offset = k === 'today' ? 0 : offset + (k === 'next' ? DAYS : -DAYS);
+      if (page.disabled) return;
+      const to = k === 'today' ? 0 : offset + (k === 'next' ? DAYS : -DAYS);
+      offset = Math.max(0, Math.min(to, Math.floor(WINDOW_DAYS / DAYS) * DAYS));
       render();
       return;
     }

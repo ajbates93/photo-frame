@@ -21,22 +21,27 @@ const dayDiff = (a, b) => Math.round(
   (Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 86400000,
 );
 
-// Due label relative to `now`: today 6:00pm / tomorrow / Saturday / 5 November.
+// A due at exactly local midnight is date-only (no time shown; due all that day).
+const dateOnly = (d) => d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0;
+
+// Due label relative to `now`: today 6:00pm / today / tomorrow / Saturday / 5 November.
 export function fmtDue(due, now) {
   const d = new Date(due);
   if (Number.isNaN(d.getTime())) return '';
   const diff = dayDiff(d, now);
-  const timed = d.getHours() !== 0 || d.getMinutes() !== 0;
-  if (diff === 0) return `today ${fmtTime(d)}`;
+  const timed = !dateOnly(d);
+  if (diff === 0) return timed ? `today ${fmtTime(d)}` : 'today';
   if (diff === 1) return timed ? `tomorrow ${fmtTime(d)}` : 'tomorrow';
   if (diff >= 2 && diff <= 6) return fmtDay(d);
   return fmtDate(d);
 }
 
-function isOverdue(t, now) {
+// Timed dues are overdue once passed; date-only dues only after their day ends.
+export function isOverdue(t, now) {
   if (t.done || !t.due) return false;
   const d = new Date(t.due);
-  return !Number.isNaN(d.getTime()) && d < now;
+  if (Number.isNaN(d.getTime())) return false;
+  return (dateOnly(d) ? addDays(d, 1) : d) <= now;
 }
 
 function taskHtml(t, now) {

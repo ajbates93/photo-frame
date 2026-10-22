@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { makeFixtureState } from '../dev/fixtures.js';
-import { createTasksView, fmtDue, isoLocal } from '../src/views/tasks.js';
+import { createTasksView, fmtDue, isOverdue, isoLocal } from '../src/views/tasks.js';
 
 const NOW = new Date(2026, 9, 22, 8, 42);
 const css = readFileSync('src/css/views/tasks.css', 'utf8');
@@ -33,6 +33,22 @@ describe('fmtDue', () => {
     expect(fmtDue(at(3, 9), NOW)).toBe('Sunday');
     expect(fmtDue(at(6, 9), NOW)).toBe('Wednesday');
     expect(fmtDue(at(7, 9), NOW)).toBe('29 October');
+  });
+  it('treats a due at local midnight as date-only', () => {
+    expect(fmtDue(at(0, 0), NOW)).toBe('today');
+    expect(fmtDue(at(1, 0), NOW)).toBe('tomorrow');
+    expect(fmtDue(at(3, 0), NOW)).toBe('Sunday');
+    expect(fmtDue(at(0, 0, 1), NOW)).toBe('today 12:01am');
+  });
+  it('a date-only due is overdue only after its day ends; a timed one once passed', () => {
+    const task = (due) => ({ id: 'x', done: false, due });
+    expect(isOverdue(task(at(0, 0)), NOW)).toBe(false);
+    expect(isOverdue(task(at(0, 0)), new Date(2026, 9, 22, 23, 59))).toBe(false);
+    expect(isOverdue(task(at(0, 0)), new Date(2026, 9, 23, 0, 0))).toBe(true);
+    expect(isOverdue(task(at(-1, 0)), NOW)).toBe(true);
+    expect(isOverdue(task(at(0, 8)), NOW)).toBe(true);
+    expect(isOverdue(task(at(0, 9)), NOW)).toBe(false);
+    expect(isOverdue({ ...task(at(-1, 0)), done: true }, NOW)).toBe(false);
   });
   it('isoLocal carries the offset', () => {
     expect(isoLocal(new Date(2026, 9, 22, 18, 0))).toBe('2026-10-22T18:00:00+01:00');

@@ -41,6 +41,12 @@ describe('home view', () => {
     expect(today.el.querySelector('.hero .meta').textContent).toBe('9:00am–9:30am');
   });
 
+  it('weather shows hourly entries from the current hour onward', () => {
+    const { el } = setup(new Date(2026, 9, 22, 14, 30));
+    const hours = [...el.querySelectorAll('.weather .hours > div')].map((d) => d.textContent);
+    expect(hours.map((h) => h.match(/^\d+(am|pm)/)[0])).toEqual(['2pm', '4pm', '6pm', '8pm']);
+  });
+
   it('hero says nothing coming up when there are no events in 48 h', () => {
     const { el } = setup(NOW, (st) => { st.events = []; });
     expect(el.querySelector('.hero').textContent).toContain('Nothing coming up');

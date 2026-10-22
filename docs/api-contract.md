@@ -28,6 +28,14 @@ State = {
 Cond = 'sun'|'partly'|'cloud'|'rain'|'snow'|'fog'|'storm'|'night'
 ```
 
+### Field semantics
+
+- **Time zone.** The frontend renders every time in the device's local time zone, which must be set to `Europe/London`. The `timezone` field is informational only; the frontend does not convert with it.
+- **Event window.** `events` carries every event overlapping the window from the start of today (local midnight) to today + 14 days. The calendar view never pages before today and disables its › button once the next page would start beyond that window.
+- **All-day events.** `allDay: true` events have `start` and `end` at local midnight, as ISO with offset (e.g. `2026-10-23T00:00:00+01:00`). `end` is exclusive, Google style: a one-day event on 23 October ends at `2026-10-24T00:00:00+01:00`.
+- **Task due.** `due` is an ISO instant or `null`. A `due` at exactly local midnight means the task is due on that date with no time: the frontend shows `today`, `tomorrow` or the weekday without a time, and treats it as overdue only once that day has ended. Any other instant is a timed due, overdue once it has passed.
+- **Hourly weather.** `weather.hourly` starts at the current hour and runs forward. The frontend also drops any entry before the current hour and shows at most six.
+
 ## Actions
 
 Each action returns the full new `State`. Errors return `{error: string}` with a 4xx or 5xx status.
@@ -42,3 +50,7 @@ Each action returns the full new `State`. Errors return `{error: string}` with a
 | `POST /api/plugs/:id` | `{on}` |
 | `POST /api/speaker` | `{action: 'play'\|'pause'\|'volume', volume?}` |
 | `POST /api/screen/wake` | none |
+
+## Photos
+
+`GET /api/photos/:id` returns the image bytes for a photo listed in `State.photos` (its `url`). The response is `image/jpeg` (the dev mock may serve `image/svg+xml`), at most 1280 × 800, and cacheable: the server sends a long-lived `Cache-Control` header, since a photo's bytes never change for a given id.

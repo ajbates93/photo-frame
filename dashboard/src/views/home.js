@@ -68,9 +68,11 @@ function heroHtml(state, now) {
   };
 }
 
-function weatherHtml(w) {
+function weatherHtml(w, now) {
   if (!w) return '<div class="lbl">Weather</div><div class="placeholder">Weather unavailable</div>';
-  const hours = (w.hourly || []).slice(0, 6).map((h) => `<div>${fmtHour(new Date(h.time).getHours())}`
+  // Entries before the current hour are dropped (the server should not send them).
+  const hourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()).getTime();
+  const hours = (w.hourly || []).filter((h) => new Date(h.time).getTime() >= hourStart).slice(0, 6).map((h) => `<div>${fmtHour(new Date(h.time).getHours())}`
     + `${icon(COND_ICON[h.cond] || 'cloud', 20)}<b>${Math.round(h.temp)}°</b></div>`).join('');
   return `<div class="lbl">${esc(w.location || 'Weather')}</div>`
     + `<div class="wx-top">${icon(COND_ICON[w.cond] || 'cloud', 40)}<span class="wx-temp">${Math.round(w.temp)}°</span>`
@@ -198,7 +200,7 @@ export function createHomeView() {
       setHtml($('.hero'), hero.html);
 
       setHtml($('.plugs'), plugsHtml(s.plugs));
-      setHtml($('.weather'), weatherHtml(s.weather));
+      setHtml($('.weather'), weatherHtml(s.weather, now));
 
       const today = dayStart(now);
       const tomorrow = addDays(today, 1);

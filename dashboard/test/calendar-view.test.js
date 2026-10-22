@@ -66,6 +66,25 @@ describe('calendar view', () => {
     expect(el.querySelectorAll('.now')).toHaveLength(1);
   });
 
+  it('pages only within the 14-day event window: no › past it, no ‹ before today', () => {
+    const { el } = setup();
+    const prev = el.querySelector('[data-page="prev"]');
+    const next = el.querySelector('[data-page="next"]');
+    expect(prev.disabled).toBe(true);
+    expect(next.disabled).toBe(false);
+    prev.click();
+    expect(heads(el)[0]).toContain('Today');
+    next.click();
+    expect(prev.disabled).toBe(false);
+    next.click();
+    expect(heads(el)[0]).toContain('1 Nov');
+    expect(heads(el)[4]).toContain('5 Nov');
+    expect(next.disabled).toBe(true);
+    next.click();
+    next.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(heads(el)[0]).toContain('1 Nov');
+  });
+
   it('tapping an event opens a sheet with details, and it closes', () => {
     const { el } = setup();
     const ev = [...el.querySelectorAll('.ev')].find((e) => e.textContent.includes('Swimming'));
