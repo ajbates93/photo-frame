@@ -29,3 +29,8 @@ __pycache__/
 
 # Visual-review screenshots (generated)
 dashboard/screenshots/
+
+# Home server
+server/config.toml
+server/secrets/
+server/.venv/

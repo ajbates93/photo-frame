@@ -69,16 +69,46 @@ describe('control view', () => {
     expect(ctx.act).not.toHaveBeenCalled();
   });
 
-  it('volume + at 40 sends 50, - sends 30, and it clamps at 100', () => {
+  it('volume + at 40 sends 50, then - from 50 sends 40, and it clamps at 100', () => {
     const { el, ctx, view, state } = setup();
     el.querySelector('[data-vol="1"]').click();
     expect(ctx.act).toHaveBeenCalledWith('POST', '/api/speaker', { action: 'volume', volume: 50 });
+    state.speaker.volume = 50;
+    view.update(state, ctx);
     el.querySelector('[data-vol="-1"]').click();
-    expect(ctx.act).toHaveBeenCalledWith('POST', '/api/speaker', { action: 'volume', volume: 30 });
+    expect(ctx.act).toHaveBeenCalledWith('POST', '/api/speaker', { action: 'volume', volume: 40 });
+    state.speaker.volume = 40;
+    view.update(state, ctx); // server caught up
     state.speaker.volume = 100;
     view.update(state, ctx);
     el.querySelector('[data-vol="1"]').click();
     expect(ctx.act).toHaveBeenLastCalledWith('POST', '/api/speaker', { action: 'volume', volume: 100 });
+  });
+
+  it('quick + taps step from the last pressed level and show it before the server answers', () => {
+    const { el, ctx, view, state } = setup();
+    el.querySelector('[data-vol="1"]').click();
+    el.querySelector('[data-vol="1"]').click();
+    expect(ctx.act.mock.calls.map((c) => c[2].volume)).toEqual([50, 60]);
+    expect(el.querySelector('.sp-level span').textContent).toBe('60%');
+    view.update(state, ctx); // stale server value (40) does not undo the display
+    expect(el.querySelector('.sp-level span').textContent).toBe('60%');
+    state.speaker.volume = 60;
+    view.update(state, ctx); // server caught up: pending cleared
+    state.speaker.volume = 20;
+    view.update(state, ctx);
+    expect(el.querySelector('.sp-level span').textContent).toBe('20%');
+  });
+
+  it('pending volume expires after about 3 s', () => {
+    vi.useFakeTimers();
+    try {
+      const { el } = setup();
+      el.querySelector('[data-vol="1"]').click();
+      expect(el.querySelector('.sp-level span').textContent).toBe('50%');
+      vi.advanceTimersByTime(3100);
+      expect(el.querySelector('.sp-level span').textContent).toBe('40%');
+    } finally { vi.useRealTimers(); }
   });
 
   it('shows the track and a pause button while playing; play when paused', () => {

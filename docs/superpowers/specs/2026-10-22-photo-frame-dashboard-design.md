@@ -174,7 +174,8 @@ Backlight control needs root on the frame. The page itself cannot set brightness
 ### Calendar
 
 - Source: each Google calendar's **secret address in iCal format** (Google Calendar → Settings → the calendar → Integrate calendar). Read-only; no OAuth.
-- v1 calendars: **Alex's** and the **family** calendar. Vicky's is added later, so calendars are a list in config (link, label, colour), not hard-coded.
+- v1 calendars, decided by Alex: **Alex's**, the **family** calendar, Alex's **work** calendar (full event titles, not "Busy") and Google's public **UK holidays** calendar. Vicky's is added later, so calendars are a list in config (link, label, colour), not hard-coded.
+- **v2:** birthdays. Google's Birthdays calendar comes from Contacts and has no iCal link, so it would need the People API with its own sign-in.
 - The secret links are stored only on the Pi. Alex will paste them straight into the Pi's config or secrets file, not into chat or the repo.
 - The Pi fetches every few minutes. It must handle recurring events (RRULE, exceptions), all-day and multi-day events, and the `Europe/London` timezone including the clock changes.
 - "Leave by": shown when an event has a location away from home. How to estimate travel time is left to the builder; a fixed buffer is acceptable for v1.

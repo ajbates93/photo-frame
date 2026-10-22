@@ -5,12 +5,12 @@ import { createTasksView, fmtDue, isOverdue, isoLocal } from '../src/views/tasks
 const NOW = new Date(2026, 9, 22, 8, 42);
 const css = readFileSync('src/css/views/tasks.css', 'utf8');
 
-function setup(tweak) {
+function setup(tweak, now = NOW) {
   const state = makeFixtureState(NOW);
   if (tweak) tweak(state);
   const el = document.createElement('section');
   document.body.appendChild(el);
-  const ctx = { now: () => NOW, act: vi.fn(async () => {}), go: vi.fn(), toast: vi.fn() };
+  const ctx = { now: () => now, act: vi.fn(async () => {}), go: vi.fn(), toast: vi.fn() };
   const view = createTasksView();
   view.mount(el, ctx);
   view.update(state, ctx);
@@ -198,14 +198,29 @@ describe('tasks view', () => {
         { title: 'Bins out', assignee: 'vicky', due: '2026-10-22T18:00:00+01:00' });
     });
 
-    it('tomorrow is 09:00 local', () => {
+    it('tomorrow is date-only: local midnight (BST)', () => {
       const { el, ctx } = setup();
       open(el);
       type(el, 'x');
       el.querySelector('[data-who="alex"]').click();
       el.querySelector('[data-due="tomorrow"]').click();
       el.querySelector('[data-submit]').click();
-      expect(ctx.act.mock.calls[0][2]).toEqual({ title: 'x', assignee: 'alex', due: '2026-10-23T09:00:00+01:00' });
+      expect(ctx.act.mock.calls[0][2]).toEqual({ title: 'x', assignee: 'alex', due: '2026-10-23T00:00:00+01:00' });
+    });
+
+    it('tomorrow is local midnight in GMT, and across the clock change', () => {
+      for (const [now, due] of [
+        [new Date(2026, 11, 22, 8, 0), '2026-12-23T00:00:00+00:00'],
+        [new Date(2026, 9, 24, 20, 0), '2026-10-25T00:00:00+01:00'],
+      ]) {
+        const { el, ctx } = setup(null, now);
+        open(el);
+        type(el, 'x');
+        el.querySelector('[data-due="tomorrow"]').click();
+        el.querySelector('[data-submit]').click();
+        expect(ctx.act.mock.calls[0][2].due).toBe(due);
+        expect(fmtDue(due, now)).toBe('tomorrow');
+      }
     });
 
     it('pick time uses the datetime-local input and needs a value', () => {

@@ -1,0 +1,82 @@
+# Copy to config.toml (git-ignored) and fill in. Placeholders only.
+shared_secret = "CHANGE_ME"
+# data_dir = "secrets"  # holds state.db; relative to server/, created mode 0700
+
+[location]
+name = "Home"
+lat = 51.5074
+lon = -0.1278
+
+[[people]]
+id = "alex"
+name = "Alex"
+color = "#4f8cff"
+ics_url = "https://calendar.google.com/calendar/ical/REPLACE_ME/basic.ics"
+
+[[people]]
+id = "vicky"
+name = "Vicky"
+color = "#e8618c"
+ics_url = "https://calendar.google.com/calendar/ical/REPLACE_ME/basic.ics"
+
+[[calendars]]
+id = "family"
+label = "Family"
+color = "#3fb68b"
+ics_url = "https://calendar.google.com/calendar/ical/REPLACE_ME/basic.ics"
+
+[calendar]
+default_travel_mins = 15
+
+[intervals]  # seconds, at least 5; these are the defaults
+events = 300
+weather = 1800
+photos = 21600
+shopping = 60
+tasks = 60
+plugs = 15
+speaker = 10
+screen = 15
+
+[screen]
+dim_at = "22:00"
+off_at = "23:00"
+on_at = "07:00"
+idle_minutes = 30
+wake_minutes = 10
+
+# Weekly outings the weather hint is tailored to (London wall time). Optional.
+[[routines]]
+label = "School run"
+days = ["mon", "fri"]
+start = "08:30"
+end = "09:00"
+
+[[routines]]
+label = "Evening walk"
+days = ["sat", "sun"]
+start = "18:00"
+end = "18:30"
+
+# Optional sections: omit to disable the provider.
+# [keep]
+# list_title = "Shopping"
+# email = "REPLACE_ME"
+#
+# [drive]
+# folder_id = "REPLACE_ME"
+# service_account_file = "secrets/drive-sa.json"
+#
+# [[plugs]]
+# host = "192.0.2.10"
+# name = "Lamp"
+# room = "Living room"
+# confirm = false
+# hidden = false
+#
+# [tapo]
+# username = "REPLACE_ME"
+# password = "REPLACE_ME"
+#
+# [speaker]
+# name = "Kitchen speaker"

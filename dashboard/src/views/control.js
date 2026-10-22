@@ -4,6 +4,7 @@ import { esc, setHtml } from '../ui/html.js';
 import { createPlugToggle } from '../ui/plug-toggle.js';
 
 const VOL_STEP = 10;
+const PENDING_MS = 3000;
 const clampVol = (v) => Math.max(0, Math.min(100, v));
 
 const SKELETON = `
@@ -31,10 +32,10 @@ function roomsHtml(plugs) {
     + '</div></div>').join('');
 }
 
-function speakerHtml(sp) {
+function speakerHtml(sp, pendingVol) {
   if (!sp) return '<div class="lbl">Speaker</div><div class="ctl-empty">Speaker unavailable</div>';
   const dis = sp.reachable ? '' : ' disabled';
-  const vol = clampVol(Math.round(Number(sp.volume) || 0));
+  const vol = clampVol(pendingVol ?? Math.round(Number(sp.volume) || 0));
   const now = sp.reachable
     ? (sp.title ? `<div class="sp-title">${esc(sp.title)}</div>${sp.artist ? `<div class="sp-artist">${esc(sp.artist)}</div>` : ''}`
       : '<div class="sp-title sp-idle">Nothing playing</div>')
@@ -51,13 +52,17 @@ export function createControlView() {
   let ctx = null;
   let state = null;
   let plugs = null;
+  let pendingVol = null;
+  let pendingTimer = null;
+
+  const clearPending = () => { pendingVol = null; clearTimeout(pendingTimer); pendingTimer = null; };
 
   const $ = (sel) => q.querySelector(sel);
 
   function render() {
     if (!state || !q) return;
     setHtml($('.ctl-rooms'), roomsHtml(state.plugs));
-    setHtml($('.ctl-speaker'), speakerHtml(state.speaker));
+    setHtml($('.ctl-speaker'), speakerHtml(state.speaker, pendingVol));
   }
 
   function onClick(e) {
@@ -73,7 +78,12 @@ export function createControlView() {
     if (play) { ctx.act('POST', '/api/speaker', { action: play.dataset.sp }); return; }
     const step = t.closest('[data-vol]');
     if (step) {
-      const volume = clampVol((Number(sp.volume) || 0) + Number(step.dataset.vol) * VOL_STEP);
+      const base = pendingVol ?? (Number(sp.volume) || 0);
+      const volume = clampVol(base + Number(step.dataset.vol) * VOL_STEP);
+      pendingVol = volume;
+      clearTimeout(pendingTimer);
+      pendingTimer = setTimeout(() => { clearPending(); render(); }, PENDING_MS);
+      render();
       ctx.act('POST', '/api/speaker', { action: 'volume', volume });
     }
   }
@@ -95,6 +105,7 @@ export function createControlView() {
     update(s, c) {
       ctx = c;
       state = s;
+      if (pendingVol !== null && s.speaker && Math.round(Number(s.speaker.volume)) === pendingVol) clearPending();
       render();
     },
   };

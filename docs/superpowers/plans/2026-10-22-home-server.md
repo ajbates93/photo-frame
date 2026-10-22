@@ -347,6 +347,44 @@ server/
 - [ ] **Step 4: Run the tests.** Expected: PASS.
 - [ ] **Step 5: Commit:** `feat(server): MCP tool for adding family tasks`
 
+### Task 11a: Routine-aware weather hints
+
+**Files:** modify `server/homehub/providers/weather.py`, `server/homehub/config.py`, `server/config.example.toml`; tests in `server/tests/test_weather.py`.
+
+**Interfaces:**
+- Config gains `[[routines]]` entries: `{label: str, days: list["mon".."sun"], start: "HH:MM", end: "HH:MM"}`. The labels are personal, so they live only in the git-ignored `config.toml`. The example file uses generic labels ("School run", "Evening walk").
+- Alex's real routines live only in his git-ignored config.toml.
+- Open-Meteo request adds hourly `wind_gusts_10m` and `apparent_temperature` (still `timeformat=unixtime`).
+- `summary(hourly, now, routines) -> str` produces at most two short sentences. The rules:
+  1. The **next routine** is the first routine today whose `end` is after `now`.
+  2. If there is one, look at the hourly entries overlapping `[start, end)`:
+     - rain is any hour with `rainPct >= 50`;
+     - wind is any gust of 40 km/h or more (≥ 60 counts as "very windy");
+     - cold is apparent temperature of 3°C or less.
+  3. Phrase the conditions found, in that priority order (rain, wind, cold), with the routine label and its start time. Examples:
+     - "Rain likely for Swim class (10am) — take a coat."
+     - "Very windy at Football (4pm)."
+     - "Cold (2°) for Early run (6:30am)."
+
+     Combine at most two conditions: "Rain and wind for …". With none, the hint is "Dry for the {label} ({time})."
+  4. When there is no routine left today (weekends, or after the last one), use the general forecast for the rest of today: "Rain from 4pm.", "Showers this morning, clearing by 1pm.", "Dry rest of the day.", or, after 6pm, "Rain overnight." / "Dry tonight." Append "Windy this afternoon." when the gust rule fires.
+- Day-of-week and times use Europe/London wall time. `label` strings are lower-cased mid-sentence only if they start with a capital and aren't proper nouns — keep it simple: use the label as written in config.
+
+- [ ] **Step 1: Write failing tests** for the following. The clock is fixed and the routines are generic.
+  - At Wed 09:00 with rain at 10:00, the hint mentions the swim class.
+  - On a day without the swim class, the next routine is football.
+  - On a day with no routine left, the general forecast is used.
+  - At Sat, the general forecast is used.
+  - Gusts of 65 give "Very windy".
+  - Apparent temperature 2 gives "Cold (2°)".
+  - Two conditions combine.
+  - After the swim class ended, the next routine is football.
+  - On the clock-change day (Sun 25 Oct) the general forecast is used.
+- [ ] **Step 2: Run** `uv run pytest tests/test_weather.py -q`. Expected: FAIL.
+- [ ] **Step 3: Implement.**
+- [ ] **Step 4: Run** the full suite and ruff. Expected: PASS. Put Alex's routines into his local `config.toml` only (it is git-ignored).
+- [ ] **Step 5: Commit:** `feat(server): routine-aware weather hints (rain, wind, cold)`
+
 ### Task 12: Wire it all up and run on the Mac with real data
 
 **Files:** modify `app.py` and `hub.py` (provider registry and lifespan start/stop); create `server/README.md` (setup guide); create `server/tests/test_integration.py`.
@@ -384,7 +422,7 @@ server/
   3. Runs `uv sync --frozen` there.
   4. On the first run only, copies `config.toml` and `secrets/` across over SSH with mode 0600.
   5. Installs and enables `homehub.service` (User=pi, `Restart=always`, `MemoryMax=200M`) and restarts it.
-- The Pi needs Raspberry Pi OS Lite (64-bit), uv, and a DHCP reservation on the router.
+- The Pi needs Raspberry Pi OS Lite **64-bit** (Bookworm or later) — pillow and pillow-heif publish no armv7 wheels, so the 32-bit image cannot install them — plus uv and a DHCP reservation on the router.
 
 - [ ] **Step 1: Write a test.** It runs `bash -n deploy-pi.sh` and greps the service file for `Restart=always` and `MemoryMax`.
 - [ ] **Step 2: Run** the test. Expected: FAIL until the files exist.

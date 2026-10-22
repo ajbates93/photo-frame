@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "VITE_API=server vite",
     "build": "vite build && node scripts/check-compat.mjs dist",
     "test": "vitest run",
     "screens": "node scripts/screenshot.mjs"

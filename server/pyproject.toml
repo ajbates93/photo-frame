@@ -1,0 +1,54 @@
+[project]
+name = "homehub"
+version = "0.1.0"
+description = "Family dashboard home hub"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "gkeepapi>=0.17.1",
+    "google-api-python-client>=2.201.0",
+    "google-auth-httplib2>=0.4.4",
+    "gpsoauth>=2.0.0",
+    "httplib2>=0.22",
+    "httpx>=0.28.1",
+    "icalendar>=7.3.0",
+    "mcp>=1.9,<2",
+    "pillow>=13.0.0",
+    "pillow-heif>=1.8.1",
+    "pychromecast>=14.0.10",
+    "python-kasa>=0.11.0.1",
+    "recurring-ical-events>=3.8.2",
+    "requests>=2.32",
+    "uvicorn>=0.30",
+]
+
+[project.scripts]
+homehub = "homehub.app:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "respx>=0.21",
+    "httpx>=0.27",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["homehub"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+filterwarnings = [
+    # starlette 1.x nags about httpx in TestClient; respx needs httpx, so keep it.
+    "ignore:Using `httpx` with `starlette.testclient`",
+]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100

@@ -57,6 +57,7 @@ export function createMockApi(now) {
 
     if (path === '/api/shopping/items' && method === 'POST') {
       if (typeof body.text !== 'string' || !body.text) return err(400, 'text required');
+      if (body.text.length > 200) return err(400, 'text must be at most 200 characters');
       state.shopping.items.push({ id: `s${nextId++}`, text: body.text, checked: false });
       return ok();
     }

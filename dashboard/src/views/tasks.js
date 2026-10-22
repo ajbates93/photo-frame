@@ -152,7 +152,7 @@ export function createTasksView() {
     }
     if (draft.due === 'tomorrow') {
       const d = addDays(dayStart(now), 1);
-      return { ok: true, value: isoLocal(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 9, 0, 0, 0)) };
+      return { ok: true, value: isoLocal(d) };
     }
     const p = draft.pick ? new Date(draft.pick) : null;
     return p && !Number.isNaN(p.getTime()) ? { ok: true, value: isoLocal(p) } : { ok: false, value: null };

@@ -51,6 +51,21 @@ Each action returns the full new `State`. Errors return `{error: string}` with a
 | `POST /api/speaker` | `{action: 'play'\|'pause'\|'volume', volume?}` |
 | `POST /api/screen/wake` | none |
 
+## Helper endpoints (bearer secret)
+
+These are not used by the dashboard. Each requires `Authorization: Bearer <shared_secret>` and returns `401 {error}` otherwise. Errors are `{error: string}`.
+
+| Method and path | Body | Response |
+| --- | --- | --- |
+| `POST /api/presence` | `{active: boolean, at?: ISO with offset}` | `{ok: true, mode: 'on'\|'dim'\|'off'}` |
+| `POST /api/claude/hook` | a Claude Code hook payload, verbatim JSON (`hook_event_name`, `session_id` required; `cwd`, `notification_type`, `tool_name` used; everything else ignored and never stored) | `{ok: true}` |
+| `POST /api/claude/usage` | `{plan: string, session: {pct, resetsAt}, weekly: {pct, resetsAt}}`, `pct` a number 0-100, `resetsAt` ISO with offset | `{ok: true}` |
+
+- `400` for a body that is not a JSON object, a missing or invalid field, or a `session_id` that is empty, longer than 200 characters or not valid UTF-8.
+- `413` when a `claude` body exceeds 256 KB.
+- Usage older than 30 minutes is reported as `claude.usage: null`.
+- Hook states: `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `SessionStart` give `working`; a `Notification` of type `permission_prompt` or `elicitation_dialog` (or, without a type, a message mentioning "permission"), or a `PreToolUse` for `AskUserQuestion`, gives `waiting`; `idle_prompt` changes nothing; `Stop` gives `done`; `SessionEnd` removes the session. Sessions `done` for over 30 min or silent for over 6 h are dropped.
+
 ## Photos
 
 `GET /api/photos/:id` returns the image bytes for a photo listed in `State.photos` (its `url`). The response is `image/jpeg` (the dev mock may serve `image/svg+xml`), at most 1280 × 800, and cacheable: the server sends a long-lived `Cache-Control` header, since a photo's bytes never change for a given id.
