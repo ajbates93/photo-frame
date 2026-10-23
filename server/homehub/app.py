@@ -574,4 +574,14 @@ def main(argv: list[str] | None = None) -> None:
 
         raise SystemExit(asyncio.run(run_check(cfg)))
     # No access log: a line per 5 s state poll would wear the Pi's SD card.
-    uvicorn.run(create_app(cfg), host="0.0.0.0", port=8000, log_config=None, access_log=False)
+    uvicorn.run(create_app(cfg), host="0.0.0.0", port=listen_port(), log_config=None, access_log=False)
+
+
+def listen_port(env: dict[str, str] | None = None) -> int:
+    """The port to listen on: HOMEHUB_PORT (the Pi uses 80), else 8000."""
+    raw = (os.environ if env is None else env).get("HOMEHUB_PORT", "").strip()
+    if not raw:
+        return 8000
+    if not raw.isdigit() or not 1 <= int(raw) <= 65535:
+        raise SystemExit(f"HOMEHUB_PORT must be a port number, got {raw!r}")
+    return int(raw)

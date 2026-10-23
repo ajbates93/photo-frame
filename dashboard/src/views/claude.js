@@ -27,7 +27,7 @@ function meterHtml(label, m, windowMins, now) {
   const pct = Math.max(0, Math.min(100, Math.round(Number(m.pct) || 0)));
   const left = Math.max(0, minsBetween(m.resetsAt, now));
   const pace = Math.round(paceOf(Number.isFinite(left) ? left : 0, windowMins));
-  return `<div class="cl-meter"><div class="cl-meter-top"><span>${esc(label)}</span><b class="cl-pct">${pct}%</b></div>`
+  return `<div class="cl-meter"><div class="cl-meter-top"><span>${esc(label)}</span><b class="cl-pct">${pct}% used</b></div>`
     + `<div class="cl-bar"><i style="width:${pct}%"></i><em class="cl-pace" style="left:${pace}%" title="Even pace"></em></div>`
     + `<div class="cl-reset">resets in ${fmtResetsIn(left)}</div></div>`;
 }

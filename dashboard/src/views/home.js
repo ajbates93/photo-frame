@@ -106,7 +106,7 @@ function claudeHtml(claude, now) {
   if (!usableUsage(usage)) return `${head}<div class="placeholder">Usage unavailable</div>`;
   const meter = (label, m, reset) => {
     const pct = Math.max(0, Math.min(100, Math.round(m.pct)));
-    return `<div class="meter"><div class="meter-top"><span>${label}</span><b>${pct}% · resets ${reset}</b></div>`
+    return `<div class="meter"><div class="meter-top"><span>${label}</span><b>${pct}% used · resets ${reset}</b></div>`
       + `<div class="bar"><i style="width:${pct}%"></i></div></div>`;
   };
   const sessionReset = fmtCountdown(Math.max(0, (new Date(usage.session.resetsAt) - now) / 60000));

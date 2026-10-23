@@ -60,7 +60,7 @@ describe('claude view', () => {
   it('shows 42% resetting in 1h 18m with an even-pace marker at 74%', () => {
     const { el } = setup();
     const m = el.querySelector('.cl-meter');
-    expect(m.querySelector('.cl-pct').textContent).toBe('42%');
+    expect(m.querySelector('.cl-pct').textContent).toBe('42% used');
     expect(m.querySelector('.cl-reset').textContent).toBe('resets in 1h 18m');
     expect(m.querySelector('.cl-pace').style.left).toBe('74%');
     expect(el.querySelectorAll('.cl-meter')).toHaveLength(2);

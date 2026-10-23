@@ -1,0 +1,17 @@
+# homehub as a systemd *user* service on the Pi (installed by deploy-pi.sh).
+# A user service means deploys never need sudo. Two one-time root settings make it work:
+#   sudo loginctl enable-linger <user>                      # run without anyone logged in
+#   net.ipv4.ip_unprivileged_port_start=80 in sysctl.d      # bind port 80 without root
+[Unit]
+Description=homehub family dashboard server
+
+[Service]
+WorkingDirectory=%h/homehub/server
+Environment=HOMEHUB_PORT=80
+ExecStart=%h/homehub/server/.venv/bin/homehub
+Restart=always
+RestartSec=5
+MemoryMax=200M
+
+[Install]
+WantedBy=default.target
