@@ -30,6 +30,8 @@ def screen_mode(
         return "off"
     if _between(local, _t(cfg.dim_at), _t(cfg.off_at)):
         return "on" if recent else "dim"
+    if cfg.stay_on_daytime:
+        return "on"
     return "on" if recent else "off"
 
 

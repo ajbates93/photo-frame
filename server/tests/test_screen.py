@@ -174,3 +174,19 @@ def test_presence_future_at_is_clamped(screen_client, clock):
     import asyncio
     asyncio.run(screen_client.app.state.hub.refresh_one("screen"))
     assert screen_client.get("/api/state").json()["screen"]["mode"] == "off"
+
+
+def test_stay_on_daytime_ignores_presence_by_day_only():
+    from homehub.config import Screen
+    from homehub.providers.screen import screen_mode
+    from homehub.timeutil import LONDON
+    from datetime import datetime
+    cfg = Screen(stay_on_daytime=True)
+    day = datetime(2026, 10, 23, 14, 0, tzinfo=LONDON)
+    evening = datetime(2026, 10, 23, 22, 30, tzinfo=LONDON)
+    night = datetime(2026, 10, 24, 2, 0, tzinfo=LONDON)
+    assert screen_mode(day, None, None, cfg) == "on"
+    assert screen_mode(evening, None, None, cfg) == "dim"
+    assert screen_mode(evening, evening, None, cfg) == "on"
+    assert screen_mode(night, night, None, cfg) == "off"
+    assert screen_mode(day, None, None, Screen()) == "off"

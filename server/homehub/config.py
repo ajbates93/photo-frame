@@ -49,6 +49,8 @@ class Screen:
     on_at: str = "07:00"
     idle_minutes: int = 30
     wake_minutes: int = 10
+    # True: always on between on_at and dim_at; Mac presence only matters in the evening.
+    stay_on_daytime: bool = False
 
 
 @dataclass

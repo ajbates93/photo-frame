@@ -44,6 +44,8 @@ off_at = "23:00"
 on_at = "07:00"
 idle_minutes = 30
 wake_minutes = 10
+# Always on between on_at and dim_at (Mac presence only matters in the evening).
+stay_on_daytime = true
 
 # Weekly outings the weather hint is tailored to (London wall time). Optional.
 [[routines]]
