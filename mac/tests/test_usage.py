@@ -16,8 +16,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
 import usage  # noqa: E402
 
-TOKEN = "sk-ant-oat01-FAKE-TOKEN-VALUE"
-SECRET = "helper-secret-value"
+TOKEN = "sk-ant-oat01-FAKE-TOKEN-VALUE"  # ggignore (fake test value)
+SECRET = "helper-secret-value"  # ggignore (fake test value)
 USAGE = {
     "five_hour": {"utilization": 42.5, "resets_at": "2026-10-22T18:00:00.123456+00:00"},
     "seven_day": {"utilization": 17, "resets_at": "2026-10-27T09:00:00Z"},

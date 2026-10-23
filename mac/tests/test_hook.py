@@ -13,7 +13,7 @@ HOOK = os.path.join(HERE, "..", "claude_hook.py")
 sys.path.insert(0, os.path.join(HERE, ".."))
 import claude_hook  # noqa: E402
 
-SECRET = "hook-secret-xyz"
+SECRET = "hook-secret-xyz"  # ggignore (fake test value)
 
 
 class Handler(BaseHTTPRequestHandler):

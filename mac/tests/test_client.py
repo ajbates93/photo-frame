@@ -10,7 +10,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import homehub_client  # noqa: E402
 
-SECRET = "s3cret-token-value"
+SECRET = "s3cret-token-value"  # ggignore (fake test value)
 
 
 class Handler(BaseHTTPRequestHandler):

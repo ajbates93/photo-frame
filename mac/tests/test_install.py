@@ -7,7 +7,7 @@ import unittest
 MAC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INSTALL = os.path.join(MAC, "install.sh")
 UNINSTALL = os.path.join(MAC, "uninstall.sh")
-SECRET = "s3cr3t-value-xyz"
+SECRET = "s3cr3t-value-xyz"  # ggignore (fake test value)
 SETTINGS = '{\n  "statusLine": {"type": "command", "command": "x"},\n  "hooks": {"SessionStart": [{"matcher": "*", "hooks": [{"type": "command", "command": "echo hi"}]}]}\n}\n'
 
 
