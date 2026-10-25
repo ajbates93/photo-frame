@@ -3,6 +3,8 @@
 .photos { position: relative; width: 100%; height: 100%; }
 .photos .ss-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
 .photos .ss-img.is-in { opacity: 1; }
+/* Portrait photos are shown whole, with black bars either side. */
+.photos .ss-img.is-portrait { object-fit: contain; }
 .photos .ss-img.is-broken { visibility: hidden; }
 .ph-shade { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(transparent 70%, rgba(0, 0, 0, .55)); }
 .ph-cap { position: absolute; left: 32px; bottom: 84px; right: 32px; z-index: 2; color: #fff; display: flex; align-items: baseline; }

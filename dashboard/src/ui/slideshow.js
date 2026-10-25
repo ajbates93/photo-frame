@@ -80,6 +80,8 @@ export function createSlideshow(el, { intervalMs = 12000, onChange } = {}) {
     back.addEventListener('error', show, { once: true });
     clearTimeout(loadTimer);
     loadTimer = setTimeout(show, LOAD_TIMEOUT_MS);
+    // Lets a view show portrait photos whole instead of cropping them.
+    back.classList.toggle('is-portrait', Number(photo.height) > Number(photo.width));
     back.src = photo.url;
   }
 
